@@ -1,0 +1,272 @@
+/* User Stats - Diseño Profesional Simplificado */
+.user-stats-container {
+  padding: 0;
+}
+
+/* Header de Estadísticas */
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid #eaeef2;
+  margin-bottom: 2rem;
+}
+
+.stats-header-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stats-header-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #321fdb 0%, #1f1498 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.stats-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.stats-subtitle {
+  color: #6c757d;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.stats-overview {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.stats-overview-item {
+  text-align: right;
+}
+
+.stats-overview-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.stats-overview-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2eb85c;
+}
+
+/* Tarjetas Premium */
+.user-stats-row {
+  margin: 0;
+}
+
+.premium-card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  background: white;
+  height: 100%;
+}
+
+.premium-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.stats-card-body {
+  padding: 1.5rem !important;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Header de Tarjetas */
+.stats-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.stats-icon-container {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stats-icon {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.stats-trend {
+  background: rgba(46, 184, 92, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid rgba(46, 184, 92, 0.2);
+}
+
+.stats-percentage {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2eb85c;
+}
+
+/* Contenido de Tarjetas */
+.stats-content {
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.stats-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #2c3e50;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stats-label {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.stats-description {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Progress Bars en Tarjetas */
+.stats-progress {
+  margin-top: auto;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.stats-progress-bar {
+  height: 6px;
+  border-radius: 3px;
+  background-color: #f8f9fa;
+  overflow: hidden;
+}
+
+.stats-progress-bar .progress-bar {
+  border-radius: 3px;
+  transition: width 1.5s ease-in-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .stats-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .stats-overview {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .stats-value {
+    font-size: 2rem;
+  }
+  
+  .stats-card-header {
+    margin-bottom: 1rem;
+  }
+  
+  .stats-icon-container {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .stats-label {
+    font-size: 1rem;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.premium-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.stats-header {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+/* Efectos de profundidad */
+.stats-card-body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #321fdb, #2eb85c, #f9b115, #e55353);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.premium-card:hover .stats-card-body::before {
+  opacity: 1;
+}
