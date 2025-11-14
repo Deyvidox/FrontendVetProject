@@ -8,11 +8,14 @@ import {
   cilDescription,
   cilDrop,
   cilExternalLink,
+  cilGroup,
+  cilList,
   cilNotes,
   cilPencil,
   cilPuzzle,
   cilSpeedometer,
   cilStar,
+  cilUserFollow,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -29,8 +32,42 @@ const _nav = [
   },
   {
     component: CNavTitle,
-    name: 'Theme',
+    name: 'Management',
   },
+  {
+    component: CNavGroup,
+    name: 'Users',
+    icon: <CIcon icon={cilGroup} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Register User',
+        to: '/users/register',
+        icon: <CIcon icon={cilUserFollow} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Users List',
+        to: '/users/list',
+        icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+      },
+    ],
+  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /*
   {
     component: CNavItem,
     name: 'Colors',
@@ -488,6 +525,7 @@ const _nav = [
     href: 'https://coreui.io/react/docs/templates/installation/',
     icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
   },
+  */
 ]
 
 export default _nav

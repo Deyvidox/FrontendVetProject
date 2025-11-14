@@ -1,0 +1,73 @@
+/* Estilos generales para el módulo de Usuarios */
+.users-container {
+  padding: 0;
+}
+
+.users-title {
+  color: #321fdb;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #321fdb;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .users-container {
+    padding: 0 10px;
+  }
+  
+  .users-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Card customizations */
+.users-card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.users-card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #d8dbe0;
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem 0.5rem 0 0 !important;
+}
+
+.users-card-header h5 {
+  margin: 0;
+  color: #321fdb;
+  font-weight: 600;
+}
+
+/* Loading states */
+.users-loading-container {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.users-loading-text {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-left: 0.5rem;
+}
+
+/* Empty state */
+.users-empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+}
+
+.users-empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
