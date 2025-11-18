@@ -23,7 +23,7 @@ import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 
 // Importo los estilos personalizados del login
-import './login.css'
+import '../../css/login/Login.css'
 
 const Login = () => {
   const location = useLocation()
@@ -148,7 +148,7 @@ const Login = () => {
                     <CCol xs={6} className="text-right">
                       <CButton
                         color="link"
-                        onClick={() => navigate('/forgot-password')}
+                        onClick={() => navigate('/recover/password')}
                       >
                         Forgot password?
                       </CButton>

@@ -23,7 +23,7 @@ import {
 import CIcon from '@coreui/icons-react'
 
 import avatar8 from './../../assets/images/avatars/8.jpg'
-import ProfileModal from '../profile/Profilemodal'
+import ProfileModal from '../profile/ProfileModal'
 import { useProfileModal } from '../../hooks/useProfileModal'
 
 const AppHeaderDropdown = () => {
