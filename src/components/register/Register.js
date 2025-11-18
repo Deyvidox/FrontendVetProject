@@ -15,7 +15,7 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser, cilCalendar, cilEnvelopeClosed, cilPhone } from '@coreui/icons'
-import './register.css'
+import '../../css/register/Register.css'
 
 const Register = () => {
   const navigate = useNavigate()

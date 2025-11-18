@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react'
 import { CButton, CForm, CFormInput } from '@coreui/react'
-import './forgot.css'
+import '../../css/recover_password/RecoverPassword.css'
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('')

@@ -12,8 +12,9 @@ import './scss/examples.scss'
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
 
 // Pages
-const Login = React.lazy(() => import('./views/pages/login/Login'))
-const Register = React.lazy(() => import('./views/pages/register/Register'))
+const Login = React.lazy(() => import('./components/login/Login'))
+const Register = React.lazy(() => import('./components/register/Register'))
+const RecoverPassword = React.lazy(() => import('./components/recover_password/RecoverPassword'))
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'))
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
 
@@ -45,11 +46,20 @@ const App = () => {
         }
       >
         <Routes>
-          <Route exact path="/login" name="Login Page" element={<Login />} />
-          <Route exact path="/register" name="Register Page" element={<Register />} />
-          <Route exact path="/404" name="Page 404" element={<Page404 />} />
-          <Route exact path="/500" name="Page 500" element={<Page500 />} />
-          <Route path="*" name="Home" element={<DefaultLayout />} />
+          {/* RUTAS PÚBLICAS */}
+          <Route path="/login" name="Login Page" element={<Login />} />
+          <Route path="/register" name="Register Page" element={<Register />} />
+          <Route path="/recover-password" name="Recover Password" element={<RecoverPassword />} />
+          <Route path="/500" name="Page 500" element={<Page500 />} />
+          
+          {/* RUTA PRINCIPAL - Redirige a login o dashboard según autenticación */}
+          <Route path="/" element={<Login />} />
+          
+          {/* RUTAS PROTEGIDAS */}
+          <Route path="/*" name="Home" element={<DefaultLayout />} />
+          
+          {/* RUTA 404 */}
+          <Route path="*" element={<Page404 />} />
         </Routes>
       </Suspense>
     </HashRouter>
