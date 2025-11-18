@@ -1,9 +1,12 @@
 import React from 'react'
 
-const Login = React.lazy(() => import('./views/pages/login/Login'))
+const Login = React.lazy(() => import('./components/login/Login'))
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const UserRegister = React.lazy(() => import('./components/users/UserRegister'))
 const Users = React.lazy(() => import('./components/users/Users'))
+const RecoverPassword = React.lazy(() => import('./components/recover_password/RecoverPassword'))
+const Register = React.lazy(() => import('./components/register/Register'))
+
 
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
@@ -64,6 +67,8 @@ const routes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/users/list', name: 'Users', element: Users },
   { path: '/users/register', name: 'Register User', element: UserRegister },
+  { path: '/recover/password', name: 'Recover Password', element: RecoverPassword },
+  { path: '/register', name: 'Register', element: Register },
 
   // THEME
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
