@@ -39,7 +39,7 @@ const Register = () => {
   // Estado del botón ver/ocultar contraseña
   const [showPassword, setShowPassword] = useState(false)
 
-  // Expresiones regulares para validar campos
+  // Expresiones regulares
   const regex = useMemo(() => ({
     nombre: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,100}$/,
     usuario: /^[A-Za-z0-9._-]{4,50}$/,
@@ -48,17 +48,19 @@ const Register = () => {
     passwordFuerte: /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
   }), [])
 
-  // Validación individual de cada campo
+  // Validación por campo
   const validarCampo = (name, value) => {
     switch (name) {
       case 'nombres':
         if (!value) return 'Los nombres son obligatorios.'
         if (!regex.nombre.test(value)) return 'Solo letras y espacios (2–100).'
         return ''
+
       case 'apellidos':
         if (!value) return 'Los apellidos son obligatorios.'
         if (!regex.nombre.test(value)) return 'Solo letras y espacios (2–100).'
         return ''
+
       case 'fecha_nacimiento':
         if (!value) return 'La fecha de nacimiento es obligatoria.'
         const fecha = new Date(value)
@@ -71,43 +73,50 @@ const Register = () => {
         if (edadReal < 18) return 'Debes ser mayor de 18 años.'
         if (edadReal > 90) return 'La edad no puede superar los 90 años.'
         return ''
+
       case 'telefono':
         if (!value) return ''
         if (!regex.telefono.test(value)) return 'Formato de teléfono inválido.'
         return ''
+
       case 'direccion':
         if (!value) return ''
         if (value.trim().length < 5) return 'Dirección demasiado corta.'
         return ''
+
       case 'usuario':
         if (!value) return 'El usuario es obligatorio.'
-        if (!regex.usuario.test(value)) return '4–50 caracteres. Solo letras, números, ".", "_" y "-".'
+        if (!regex.usuario.test(value)) return '4–50 caracteres. Solo letras, números y ".", "_", "-".'
         return ''
+
       case 'correo':
         if (!value) return 'El correo es obligatorio.'
         if (!regex.email.test(value)) return 'Correo inválido.'
         return ''
+
       case 'contrasena':
         if (!value) return 'La contraseña es obligatoria.'
-        if (!regex.passwordFuerte.test(value)) return 'Mínimo 8 caracteres, incluye letras y números.'
+        if (!regex.passwordFuerte.test(value)) return 'Debe tener mínimo 8 caracteres e incluir letras y números.'
         return ''
+
       case 'repetirContrasena':
         if (!value) return 'Repite la contraseña.'
         if (value !== formData.contrasena) return 'Las contraseñas no coinciden.'
         return ''
+
       default:
         return ''
     }
   }
 
-  // Manejo de cambio en inputs
+  // Manejo de cambios
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value })) // permitimos espacios
+    setFormData(prev => ({ ...prev, [name]: value }))
     setErrors(prev => ({ ...prev, [name]: validarCampo(name, value) }))
   }
 
-  // Validación general del formulario
+  // Validación completa
   const validarFormularioCompleto = () => {
     const nuevosErrores = {}
     Object.keys(formData).forEach(campo => {
@@ -117,32 +126,18 @@ const Register = () => {
     return Object.values(nuevosErrores).every(msg => msg === '')
   }
 
-  // Enviar registro
+  // Submit (solo frontend)
   const handleRegister = (e) => {
     e.preventDefault()
 
-    // Limpiar espacios al inicio y fin al enviar
-    const formDataTrimmed = {}
-    Object.keys(formData).forEach(key => {
-      formDataTrimmed[key] = typeof formData[key] === 'string' ? formData[key].trim() : formData[key]
-    })
-    setFormData(formDataTrimmed)
-
     if (!validarFormularioCompleto()) return
 
-    const usuarioRegistrado = {
-      usuario: formDataTrimmed.usuario,
-      correo: formDataTrimmed.correo,
-      contrasena: formDataTrimmed.contrasena,
-    }
-    localStorage.setItem('usuarioRegistrado', JSON.stringify(usuarioRegistrado))
-
-    alert('Usuario registrado correctamente ✅')
-    navigate('/login', { state: { correo: formDataTrimmed.correo } })
+    alert('Formulario válido.')
+    navigate('/login')
   }
 
-  // Render de errores
-  const renderError = campo => errors[campo] ? <small className="text-danger">{errors[campo]}</small> : null
+  const renderError = campo =>
+    errors[campo] ? <small className="text-danger">{errors[campo]}</small> : null
 
   return (
     <div className="auth-wrapper">
@@ -154,7 +149,7 @@ const Register = () => {
               {/* Panel izquierdo */}
               <CCardBody className="auth-card-inner">
                 <CForm className="auth-form" onSubmit={handleRegister} noValidate>
-                  
+
                   <div className="auth-header">
                     <h1>Registro</h1>
                     <p>Crea tu cuenta</p>
@@ -225,21 +220,21 @@ const Register = () => {
                   </CInputGroup>
                   {renderError('contrasena')}
 
-            	{/* Repetir contraseña */}
-		<CInputGroup className="mb-3 password-wrapper">
-  <CInputGroupText><CIcon icon={cilLockLocked} /></CInputGroupText>
-  <CFormInput
-    type={showPassword ? 'text' : 'password'}
-    name="repetirContrasena"
-    placeholder="Repetir contraseña"
-    value={formData.repetirContrasena}
-    onChange={handleChange}
-  />
-  <button type="button" className="btn-ver-password" onClick={() => setShowPassword(!showPassword)}>
-    {showPassword ? '👁️‍🗨️' : '👁️'}
-  </button>
-</CInputGroup>
-{renderError('repetirContrasena')}
+                  {/* Repetir contraseña */}
+                  <CInputGroup className="mb-3 password-wrapper">
+                    <CInputGroupText><CIcon icon={cilLockLocked} /></CInputGroupText>
+                    <CFormInput
+                      type={showPassword ? 'text' : 'password'}
+                      name="repetirContrasena"
+                      placeholder="Repetir contraseña"
+                      value={formData.repetirContrasena}
+                      onChange={handleChange}
+                    />
+                    <button type="button" className="btn-ver-password" onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? '👁️‍🗨️' : '👁️'}
+                    </button>
+                  </CInputGroup>
+                  {renderError('repetirContrasena')}
 
                   <CButton type="submit" className="btn">Crear cuenta</CButton>
                 </CForm>
@@ -248,7 +243,10 @@ const Register = () => {
               {/* Panel derecho */}
               <CCardBody className="auth-card-right">
                 <h2>Únete a nuestra comunidad</h2>
-                <p>Regístrate para acceder a servicios exclusivos de nuestra clínica y gestionar de forma profesional y segura la información de tus clientes y pacientes.</p>
+                <p>
+                  Regístrate para acceder a servicios exclusivos de nuestra clínica y gestionar
+                  de forma profesional y segura la información de tus clientes y pacientes.
+                </p>
               </CCardBody>
 
             </CCard>

@@ -8,8 +8,7 @@ import './scss/style.scss'
 // We use those styles to show code examples, you should remove them in your application.
 import './scss/examples.scss'
 
-// Containers
-const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
+
 
 // Pages
 const Login = React.lazy(() => import('./components/login/Login'))
@@ -18,6 +17,8 @@ const RecoverPassword = React.lazy(() => import('./components/recover_password/R
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'))
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
 
+// Containers
+const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
 const App = () => {
   const { isColorModeSet, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
   const storedTheme = useSelector((state) => state.theme)
@@ -49,7 +50,7 @@ const App = () => {
           {/* RUTAS PÚBLICAS */}
           <Route path="/login" name="Login Page" element={<Login />} />
           <Route path="/register" name="Register Page" element={<Register />} />
-          <Route path="/recover-password" name="Recover Password" element={<RecoverPassword />} />
+          <Route path="/recover/password" name="Recover Password" element={<RecoverPassword />} />
           <Route path="/500" name="Page 500" element={<Page500 />} />
           
           {/* RUTA PRINCIPAL - Redirige a login o dashboard según autenticación */}
