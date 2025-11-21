@@ -6,7 +6,7 @@ import { CFormInput, CFormSelect, CFormTextarea, CButton, CFormLabel } from '@co
 import { inventorySchema } from './inventorySchema'
 import AlertModal from './AlertModal'
 import TagInput from './TagInput'
-import '../../css/Inventory/Inventory.css'
+import '../../css/Inventory/inventory.css'
 
 // Datos de Cloudinary (reemplaza <tu_cloud_name> y <tu_unsigned_preset>)
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/<tu_cloud_name>/image/upload'
