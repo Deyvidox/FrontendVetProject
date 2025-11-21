@@ -37,6 +37,7 @@ const _nav = [
     component: CNavTitle,
     name: 'Management',
   },
+
   {
     component: CNavGroup,
     name: 'Users',
@@ -56,6 +57,27 @@ const _nav = [
       },
     ],
   },
+  {
+
+    component:CNavItem,
+        name:'Appointment',
+        to:'/appointments',
+        icon:<CIcon icon={cilNotes} customClassName="nav-icon" />,
+  },   
+
+   {
+
+    component:CNavItem,
+        name:'Appointments list',
+        to:'/appointments/list',
+        icon:<CIcon icon={cilList} customClassName="nav-icon" />,
+  },
+
+    {component:CNavItem,
+        name:'Inventory',
+        to:'/Inventory',
+        icon:<CIcon icon={cilCalculator} customClassName="nav-icon" />,
+    },
 
   {
   component: CNavGroup,
@@ -74,6 +96,7 @@ const _nav = [
       to: '/pets/mypets',
       icon: <CIcon icon={cilPaw} customClassName="nav-icon" />,
     },
+    
     {
       component: CNavItem,
       name: 'Pets List',
@@ -93,6 +116,42 @@ const _nav = [
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
 
 
