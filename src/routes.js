@@ -1,5 +1,6 @@
 import React from 'react'
 
+// LOGIN Y USUARIOS
 const Login = React.lazy(() => import('./components/login/Login'))
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const UserRegister = React.lazy(() => import('./components/users/UserRegister'))
@@ -7,11 +8,16 @@ const Users = React.lazy(() => import('./components/users/Users'))
 const RecoverPassword = React.lazy(() => import('./components/recover_password/RecoverPassword'))
 const Register = React.lazy(() => import('./components/register/Register'))
 
+// APPOINTMENTS
 
+const AppointmentPage  = React.lazy(() => import('./components/Appointments/AppointmentsPage'))
+const AppointmentList  = React.lazy(() => import('./components/Appointments/AppointmentList'))
+
+// THEME
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
-// Base
+// BASE
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
 const Cards = React.lazy(() => import('./views/base/cards/Cards'))
@@ -28,12 +34,12 @@ const Tabs = React.lazy(() => import('./views/base/tabs/Tabs'))
 const Tables = React.lazy(() => import('./views/base/tables/Tables'))
 const Tooltips = React.lazy(() => import('./views/base/tooltips/Tooltips'))
 
-// Buttons
+// BUTTONS
 const Buttons = React.lazy(() => import('./views/buttons/buttons/Buttons'))
 const ButtonGroups = React.lazy(() => import('./views/buttons/button-groups/ButtonGroups'))
 const Dropdowns = React.lazy(() => import('./views/buttons/dropdowns/Dropdowns'))
 
-//Forms
+// FORMS
 const ChecksRadios = React.lazy(() => import('./views/forms/checks-radios/ChecksRadios'))
 const FloatingLabels = React.lazy(() => import('./views/forms/floating-labels/FloatingLabels'))
 const FormControl = React.lazy(() => import('./views/forms/form-control/FormControl'))
@@ -43,32 +49,40 @@ const Range = React.lazy(() => import('./views/forms/range/Range'))
 const Select = React.lazy(() => import('./views/forms/select/Select'))
 const Validation = React.lazy(() => import('./views/forms/validation/Validation'))
 
+// CHARTS
 const Charts = React.lazy(() => import('./views/charts/Charts'))
 
-// Icons
+// ICONS
 const CoreUIIcons = React.lazy(() => import('./views/icons/coreui-icons/CoreUIIcons'))
 const Flags = React.lazy(() => import('./views/icons/flags/Flags'))
 const Brands = React.lazy(() => import('./views/icons/brands/Brands'))
 
-// Notifications
+// NOTIFICATIONS
 const Alerts = React.lazy(() => import('./views/notifications/alerts/Alerts'))
 const Badges = React.lazy(() => import('./views/notifications/badges/Badges'))
 const Modals = React.lazy(() => import('./views/notifications/modals/Modals'))
 const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'))
 
+// WIDGETS
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
 const routes = [
-  // LOGIN — se muestra primero
+  // LOGIN
   { path: '/', exact: true, name: 'Login', element: Login },
   { path: '/login', name: 'Login', element: Login },
 
-  // RUTAS PRIVADAS
+  // PRIVADAS
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
-  { path: '/users/list', name: 'Users', element: Users },
   { path: '/users/register', name: 'Register User', element: UserRegister },
+  { path: '/users/list', name: 'Users', element: Users },
   { path: '/recover/password', name: 'Recover Password', element: RecoverPassword },
   { path: '/register', name: 'Register', element: Register },
+
+  // APPOINTMENTS
+  
+  { path: '/appointments', name: 'Appointments', element: AppointmentPage },
+  { path: '/appointments/list', name: 'Appointment List', element: AppointmentList},
+
 
   // THEME
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
@@ -123,7 +137,7 @@ const routes = [
   { path: '/notifications/modals', name: 'Modals', element: Modals },
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
 
-  // WIDGETS
+  // WIDGET
   { path: '/widgets', name: 'Widgets', element: Widgets },
 ]
 
