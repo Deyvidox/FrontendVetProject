@@ -13,6 +13,9 @@ const Register = React.lazy(() => import('./components/register/Register'))
 const AppointmentPage  = React.lazy(() => import('./components/Appointments/AppointmentsPage'))
 const AppointmentList  = React.lazy(() => import('./components/Appointments/AppointmentList'))
 
+// INVENTORY
+const InventoryPage = React.lazy(() => import('./components/Inventory/InventoryPage'))
+
 // THEME
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
@@ -83,7 +86,9 @@ const routes = [
   { path: '/appointments', name: 'Appointments', element: AppointmentPage },
   { path: '/appointments/list', name: 'Appointment List', element: AppointmentList},
 
-
+  //inventory 
+  {path: '/Inventory', name: 'Inventory', element: InventoryPage},
+ 
   // THEME
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },

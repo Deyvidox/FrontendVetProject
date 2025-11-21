@@ -68,7 +68,13 @@ const _nav = [
         name:'Appointments list',
         to:'/appointments/list',
         icon:<CIcon icon={cilList} customClassName="nav-icon" />,
-  } 
+  },
+
+    {component:CNavItem,
+        name:'Inventory',
+        to:'/Inventory',
+        icon:<CIcon icon={cilCalculator} customClassName="nav-icon" />,
+    }
 
 
 
@@ -78,6 +84,44 @@ const _nav = [
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
 
 

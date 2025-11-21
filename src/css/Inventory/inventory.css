@@ -1,0 +1,283 @@
+/* =============================================== */
+/*        FUENTES Y VARIABLES GLOBALES           */
+/* =============================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-start: #d0f0ed;
+  --bg-end: #e0f7f4;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(255,255,255,0.3);
+  --card-shadow: rgba(0, 0, 0, 0.25);
+  --text: #1f2937;
+  --muted: #4b5563;
+  --input-bg: rgba(255,255,255,0.95);
+  --input-border: #06b174;
+  --input-focus-shadow: rgba(6,177,116,0.35);
+  --primary: #06b174;
+  --primary-hover: #00a364;
+  --primary-glow: rgba(6,177,116,0.6);
+  --link: #3b82f6;
+  --danger: #ef4444;
+}
+
+/* Botón de Agregar Producto */
+.add-product-btn {
+  background-color: var(--primary); /* color principal */
+  color: #fff; /* texto blanco */
+  font-weight: 600;
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 15px var(--primary-glow);
+  transition: 0.3s ease;
+}
+
+.add-product-btn:hover {
+  background-color: var(--primary-hover); /* color al pasar el mouse */
+}
+
+
+/* =============================================== */
+/*        BODY Y CONTENEDOR PRINCIPAL            */
+/* =============================================== */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+  min-height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.inventory-list-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  padding: 2rem;
+  background: var(--card-bg);
+  border-radius: 25px;
+  box-shadow: 0 25px 60px var(--card-shadow);
+  border: 1px solid var(--card-border);
+  transition: 0.4s ease;
+}
+
+.inventory-list-section:hover {
+  transform: scale(1.02);
+  box-shadow: 0 35px 90px var(--card-shadow);
+}
+
+.inventory-list-section h3.list-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.inventory-list-section p.list-summary {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--muted);
+}
+
+/* =============================================== */
+/*        FILTROS Y BÚSQUEDA                     */
+/* =============================================== */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.filtros input,
+.filtros select,
+.filtros button {
+  padding: 0.8rem 1rem;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  border: 2px solid var(--primary);
+  background: var(--card-bg);
+  color: var(--text);
+  transition: 0.3s ease;
+}
+
+.filtros input:focus,
+.filtros select:focus,
+.filtros button:focus {
+  outline: none;
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* Todos los botones ahora usan el mismo color de acción */
+.filtros button,
+td button:not(.delete),
+.card-actions button,
+.modal-content button {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 6px 15px var(--primary-glow);
+}
+
+.filtros button:hover,
+td button:not(.delete):hover,
+.card-actions button:hover,
+.modal-content button:hover {
+  background: var(--primary-hover);
+}
+
+/* Botones de eliminar mantienen color de peligro */
+td button.delete,
+.card-actions button.delete {
+  background-color: var(--danger);
+  box-shadow: 0 6px 15px rgba(239,68,68,0.5);
+}
+
+/* =============================================== */
+/*        TABLA DE INVENTARIO                     */
+/* =============================================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-bg);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 10px 25px var(--card-shadow);
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+tr:hover {
+  background-color: #f0f8ff;
+}
+
+td img {
+  border-radius: 0.5rem;
+  max-width: 50px;
+}
+
+td button {
+  padding: 0.4rem 0.8rem;
+  margin-right: 0.3rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  transition: 0.3s ease;
+}
+
+/* =============================================== */
+/*        TARJETAS DE INVENTARIO                  */
+/* =============================================== */
+.inventory-cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  margin-top: 1rem;
+}
+
+.inventory-card {
+  background: var(--card-bg);
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px var(--card-shadow);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.inventory-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 15px 35px var(--card-shadow);
+}
+
+.inventory-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.tag {
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.tag-disponible { background-color: var(--primary); }
+.tag-agotado { background-color: var(--danger); }
+.tag-descontinuado { background-color: #6c757d; }
+.tag-otro { background-color: #0d6efd; }
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.card-actions button {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  transition: 0.3s ease;
+}
+
+/* =============================================== */
+/*        MODAL DE ALERTAS Y AGREGAR PRODUCTO     */
+/* =============================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px var(--card-shadow);
+  border: 1px solid var(--card-border);
+  max-width: 550px; /* más ancho para visualizar el modal mejor */
+  width: 90%; /* adaptable a móviles */
+  text-align: center;
+}
+
+.modal-content p {
+  font-size: 1rem;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+}
+
+/* =============================================== */
+/*        RESPONSIVE                               */
+/* =============================================== */
+@media (max-width: 1024px) {
+  .filtros { flex-direction: column; }
+  .card-actions { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 640px) {
+  .inventory-card { padding: 1rem; }
+  .inventory-list-section { padding: 1rem; }
+  .filtros input, .filtros select, .filtros button { width: 100%; }
+  .modal-content { width: 95%; } /* modal adaptable en móviles */
+}
