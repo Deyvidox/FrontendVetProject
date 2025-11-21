@@ -9,7 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CButton, CFormSelect, CFormInput } from '@coreui/react';
 import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
-import '../../css/Inventory/inventory.csss'; // Estilos específicos del inventario
+import '../../css/Inventory/inventory.css' // Estilos específicos del inventario
 
 // Función auxiliar que asigna una clase CSS a un producto según su estado
 // Ejemplo: "Disponible" -> "tag tag-disponible"
