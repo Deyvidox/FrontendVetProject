@@ -1,0 +1,37 @@
+.pets-module {
+  padding: 1rem;
+}
+
+.pets-module-title {
+  color: #321fdb;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #321fdb;
+}
+
+.pets-nav {
+  background: #f8f9fa;
+  border-radius: 0.375rem;
+  padding: 1rem;
+}
+
+.pets-nav-link {
+  color: #495057;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.3s ease;
+}
+
+.pets-nav-link:hover {
+  background-color: #e9ecef;
+  color: #321fdb;
+}
+
+.pets-nav-link.active {
+  background-color: #321fdb !important;
+  color: white !important;
+  border-color: #321fdb;
+}

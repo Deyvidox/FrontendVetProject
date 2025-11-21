@@ -1,0 +1,97 @@
+.my-pets-card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.my-pets-card .card-header {
+  background: linear-gradient(135deg, #e55353 0%, #d93737 100%);
+  color: white;
+  border-bottom: none;
+  padding: 1rem 1.5rem;
+}
+
+.pet-card {
+  border: none;
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.pet-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.pet-image-container {
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+.pet-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.pet-card:hover .pet-image {
+  transform: scale(1.05);
+}
+
+.pet-card-body {
+  padding: 1.25rem;
+}
+
+.pet-species-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8f9fa;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  color: #495057;
+  margin-bottom: 0.75rem;
+}
+
+.pet-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #321fdb;
+  margin-bottom: 0.25rem;
+}
+
+.pet-breed {
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.pet-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Modal styles */
+.pet-details {
+  padding: 0.5rem 0;
+}
+
+.detail-item {
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.detail-item strong {
+  color: #495057;
+  margin-right: 0.5rem;
+}
+
+.medical-record {
+  background: #f8f9fa;
+  border-left: 4px solid #321fdb;
+}
