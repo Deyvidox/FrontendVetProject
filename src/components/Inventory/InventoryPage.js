@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { CButton, CModal, CModalBody, CModalHeader, CModalTitle } from '@coreui/react'
 import InventoryForm from './InventoryForm'
 import InventoryTable from './InventoryTable'
+import '../../css/Inventory/inventory.css';
 
 const InventoryPage = () => {
   // Estado de inventario

@@ -1,6 +1,7 @@
 // TagInput.jsx
 import React, { useState } from 'react';
 import { CFormInput, CButton, CBadge } from '@coreui/react';
+import '../../css/Inventory/inventory.css';
 
 // Props:
 // tags: array de etiquetas actuales
