@@ -5,6 +5,10 @@ const Login = React.lazy(() => import('./components/login/Login'))
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const UserRegister = React.lazy(() => import('./components/users/UserRegister'))
 const Users = React.lazy(() => import('./components/users/Users'))
+const PetsModule = React.lazy(() => import('./components/pets/PetsModule'))
+const RegisterPet = React.lazy(() => import('./components/pets/RegisterPet'))
+const MyPets = React.lazy(() => import('./components/pets/MyPets'))
+const PetsList = React.lazy(() => import('./components/pets/PetsList'))
 const RecoverPassword = React.lazy(() => import('./components/recover_password/RecoverPassword'))
 const Register = React.lazy(() => import('./components/register/Register'))
 
@@ -78,6 +82,10 @@ const routes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   { path: '/users/register', name: 'Register User', element: UserRegister },
   { path: '/users/list', name: 'Users', element: Users },
+  { path: '/pets/list', name: 'Pets List', element: PetsList },
+  { path: '/pets/mypets', name: 'My Pets', element: MyPets },
+  { path: '/pets/register', name: 'Register Pet', element: RegisterPet },
+  { path: '/pets', name: 'Pets Management', element: PetsModule },
   { path: '/recover/password', name: 'Recover Password', element: RecoverPassword },
   { path: '/register', name: 'Register', element: Register },
 

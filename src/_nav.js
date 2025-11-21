@@ -9,9 +9,12 @@ import {
   cilDrop,
   cilExternalLink,
   cilGroup,
+  cilHeart,
   cilList,
   cilNotes,
+  cilPaw,
   cilPencil,
+  cilPlus,
   cilPuzzle,
   cilSpeedometer,
   cilStar,
@@ -75,6 +78,32 @@ const _nav = [
         to:'/Inventory',
         icon:<CIcon icon={cilCalculator} customClassName="nav-icon" />,
     }
+
+  {
+  component: CNavGroup,
+  name: 'Pets',
+  icon: <CIcon icon={cilHeart} customClassName="nav-icon" />,
+  items: [
+    {
+      component: CNavItem,
+      name: 'Register Pet',
+      to: '/pets/register',
+      icon: <CIcon icon={cilPlus} customClassName="nav-icon" />,
+    },
+    {
+      component: CNavItem,
+      name: 'My Pets',
+      to: '/pets/mypets',
+      icon: <CIcon icon={cilPaw} customClassName="nav-icon" />,
+    },
+    {
+      component: CNavItem,
+      name: 'Pets List',
+      to: '/pets/list',
+      icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+    },
+  ],
+},
 
 
 

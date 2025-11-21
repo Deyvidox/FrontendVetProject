@@ -17,37 +17,36 @@ import {
   CPagination,
   CPaginationItem
 } from '@coreui/react';
-import { cilSearch, cilUser, cilPencil, cilTrash } from '@coreui/icons';
+import { cilSearch, cilHeart, cilPencil, cilTrash } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-import '../../css/users/UserList.css';
+import '../../css/pets/PetsList.css';
 
-const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
+const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 5;
+  const petsPerPage = 5;
 
-  // Filtrar usuarios basado en la búsqueda
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filtrar mascotas basado en la búsqueda
+  const filteredPets = pets.filter(pet =>
+    pet.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pet.breed?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pet.owner?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Paginación
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const indexOfLastPet = currentPage * petsPerPage;
+  const indexOfFirstPet = indexOfLastPet - petsPerPage;
+  const currentPets = filteredPets.slice(indexOfFirstPet, indexOfLastPet);
+  const totalPages = Math.ceil(filteredPets.length / petsPerPage);
 
-  const handleEdit = (userId) => {
-    console.log('Editar usuario:', userId);
-    // Aquí podrías abrir un modal o navegar a edición
-    alert(`Editar usuario ID: ${userId}`);
+  const handleEdit = (petId) => {
+    console.log('Editar mascota:', petId);
+    alert(`Editar mascota ID: ${petId}`);
   };
 
-  const handleDelete = (userId) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
-      onUserDelete(userId);
+  const handleDelete = (petId) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar esta mascota?')) {
+      onPetDelete?.(petId);
     }
   };
 
@@ -55,99 +54,100 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
     const statusConfig = {
       active: { color: 'success', text: 'Activo' },
       inactive: { color: 'secondary', text: 'Inactivo' },
-      suspended: { color: 'warning', text: 'Suspendido' }
+      pending: { color: 'warning', text: 'Pendiente' }
     };
     
     const config = statusConfig[status] || { color: 'secondary', text: status };
     return <CBadge color={config.color}>{config.text}</CBadge>;
   };
 
-  const getRoleBadge = (role) => {
-    const roleConfig = {
-      Administrador: 'danger',
-      Editor: 'warning',
-      Usuario: 'primary'
+  const getSpeciesBadge = (species) => {
+    const speciesConfig = {
+      dog: { color: 'primary', text: 'Perro' },
+      cat: { color: 'warning', text: 'Gato' },
+      bird: { color: 'info', text: 'Ave' },
+      rabbit: { color: 'success', text: 'Conejo' },
+      other: { color: 'secondary', text: 'Otro' }
     };
     
-    return <CBadge color={roleConfig[role] || 'secondary'}>{role}</CBadge>;
+    const config = speciesConfig[species] || { color: 'secondary', text: species };
+    return <CBadge color={config.color}>{config.text}</CBadge>;
   };
 
   return (
-    <CCard className="users-card user-list-container">
-      <CCardHeader className="users-card-header">
+    <CCard className="pets-card pets-list-container">
+      <CCardHeader className="pets-card-header">
         <div className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0">
-            <CIcon icon={cilUser} className="me-2" />
-            Listado de Usuarios
+            <CIcon icon={cilHeart} className="me-2" />
+            Listado de Mascotas
           </h5>
         </div>
       </CCardHeader>
       <CCardBody>
         {/* Barra de búsqueda */}
-        <div className="user-search-container">
+        <div className="pets-search-container">
           <CInputGroup>
-            <CInputGroupText className="user-search-icon">
+            <CInputGroupText className="pets-search-icon">
               <CIcon icon={cilSearch} />
             </CInputGroupText>
             <CFormInput
-              className="user-search-input"
-              placeholder="Buscar por nombre, email o rol..."
+              className="pets-search-input"
+              placeholder="Buscar por nombre, raza o propietario..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1); // Resetear a primera página al buscar
+                setCurrentPage(1);
               }}
             />
           </CInputGroup>
         </div>
 
-        {/* Tabla de usuarios */}
-        <div className="user-table-container">
-          <CTable responsive striped hover className="user-table">
+        {/* Tabla de mascotas */}
+        <div className="pets-table-container">
+          <CTable responsive striped hover className="pets-table">
             <CTableHead>
               <CTableRow>
                 <CTableHeaderCell>ID</CTableHeaderCell>
                 <CTableHeaderCell>Nombre</CTableHeaderCell>
-                <CTableHeaderCell>Email</CTableHeaderCell>
-                <CTableHeaderCell>Teléfono</CTableHeaderCell>
-                <CTableHeaderCell>Rol</CTableHeaderCell>
+                <CTableHeaderCell>Especie</CTableHeaderCell>
+                <CTableHeaderCell>Raza</CTableHeaderCell>
+                <CTableHeaderCell>Edad</CTableHeaderCell>
+                <CTableHeaderCell>Propietario</CTableHeaderCell>
                 <CTableHeaderCell>Estado</CTableHeaderCell>
-                <CTableHeaderCell>Fecha Creación</CTableHeaderCell>
                 <CTableHeaderCell className="text-center">Acciones</CTableHeaderCell>
               </CTableRow>
             </CTableHead>
             <CTableBody>
-              {currentUsers.length > 0 ? (
-                currentUsers.map((user) => (
-                  <CTableRow key={user.id}>
+              {currentPets.length > 0 ? (
+                currentPets.map((pet) => (
+                  <CTableRow key={pet.id}>
                     <CTableDataCell>
-                      <strong>#{user.id}</strong>
+                      <strong>#{pet.id}</strong>
                     </CTableDataCell>
                     <CTableDataCell>
-                      <strong>{user.name}</strong>
+                      <strong>{pet.name}</strong>
                     </CTableDataCell>
-                    <CTableDataCell>{user.email}</CTableDataCell>
-                    <CTableDataCell>{user.phone}</CTableDataCell>
-                    <CTableDataCell>{getRoleBadge(user.role)}</CTableDataCell>
-                    <CTableDataCell>{getStatusBadge(user.status)}</CTableDataCell>
+                    <CTableDataCell>{getSpeciesBadge(pet.species)}</CTableDataCell>
+                    <CTableDataCell>{pet.breed}</CTableDataCell>
+                    <CTableDataCell>{pet.age}</CTableDataCell>
+                    <CTableDataCell>{pet.owner}</CTableDataCell>
+                    <CTableDataCell>{getStatusBadge(pet.status)}</CTableDataCell>
                     <CTableDataCell>
-                      {new Date(user.createdAt).toLocaleDateString('es-ES')}
-                    </CTableDataCell>
-                    <CTableDataCell>
-                      <div className="user-actions-container">
+                      <div className="pets-actions-container">
                         <CButton
                           color="primary"
                           size="sm"
-                          className="user-action-btn user-action-btn-edit"
-                          onClick={() => handleEdit(user.id)}
+                          className="pets-action-btn pets-action-btn-edit"
+                          onClick={() => handleEdit(pet.id)}
                         >
                           <CIcon icon={cilPencil} />
                         </CButton>
                         <CButton
                           color="danger"
                           size="sm"
-                          className="user-action-btn user-action-btn-delete"
-                          onClick={() => handleDelete(user.id)}
+                          className="pets-action-btn pets-action-btn-delete"
+                          onClick={() => handleDelete(pet.id)}
                         >
                           <CIcon icon={cilTrash} />
                         </CButton>
@@ -158,13 +158,13 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
               ) : (
                 <CTableRow>
                   <CTableDataCell colSpan="8" className="text-center py-4">
-                    <div className="users-empty-state">
-                      <CIcon icon={cilUser} className="users-empty-state-icon" />
-                      <h5>No se encontraron usuarios</h5>
+                    <div className="pets-empty-state">
+                      <CIcon icon={cilHeart} className="pets-empty-state-icon" />
+                      <h5>No se encontraron mascotas</h5>
                       <p className="text-muted">
                         {searchTerm 
-                          ? 'No hay usuarios que coincidan con tu búsqueda' 
-                          : 'No hay usuarios registrados en el sistema'
+                          ? 'No hay mascotas que coincidan con tu búsqueda' 
+                          : 'No hay mascotas registradas en el sistema'
                         }
                       </p>
                     </div>
@@ -177,7 +177,7 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
 
         {/* Paginación */}
         {totalPages > 1 && (
-          <div className="user-pagination">
+          <div className="pets-pagination">
             <CPagination align="center">
               <CPaginationItem
                 disabled={currentPage === 1}
@@ -207,13 +207,13 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
         )}
 
         {/* Información de paginación */}
-        <div className="user-pagination-info text-center mt-2">
-          Mostrando {currentUsers.length} de {filteredUsers.length} usuarios
-          {searchTerm && ` (filtrados de ${users.length} total)`}
+        <div className="pets-pagination-info text-center mt-2">
+          Mostrando {currentPets.length} de {filteredPets.length} mascotas
+          {searchTerm && ` (filtrados de ${pets.length} total)`}
         </div>
       </CCardBody>
     </CCard>
   );
 };
 
-export default UserList;
+export default PetsList;
