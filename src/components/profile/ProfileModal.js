@@ -20,31 +20,20 @@ import {
 import { cilUser, cilCamera, cilCheckCircle, cilX } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 
-const ProfileModal = ({ show, onClose, userData, onUpdate }) => {
-  const [formData, setFormData] = useState(userData || {});
+const ProfileModal = ({ show, onClose, userData = {} }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: '',
+    bio: '',
+    ...userData
+  });
+  
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, message: '', type: '' });
-  const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(userData?.avatar || '');
   const fileInputRef = useRef(null);
-
-  // Datos por defecto
-  const defaultUserData = {
-    id: 1,
-    name: 'david',
-    email: 'david@gmail.com',
-    phone: '+58424-5678900',
-    role: 'admin',
-    department: '...',
-    position: '....',
-    location: 'tachira',
-    bio: '...',
-    avatar: '',
-    joinDate: '2024-01-01',
-    status: 'active'
-  };
-
-  const currentUser = { ...defaultUserData, ...userData };
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -55,19 +44,7 @@ const ProfileModal = ({ show, onClose, userData, onUpdate }) => {
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        showAlert('Por favor selecciona una imagen válida', 'danger');
-        return;
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        showAlert('La imagen debe ser menor a 5MB', 'danger');
-        return;
-      }
-
-      setSelectedImage(file);
-      
+    if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target.result);
@@ -77,45 +54,24 @@ const ProfileModal = ({ show, onClose, userData, onUpdate }) => {
   };
 
   const handleRemoveImage = () => {
-    setSelectedImage(null);
     setImagePreview('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     setLoading(true);
     
-    try {
-      // Simular llamada a API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const updatedData = {
-        ...formData,
-        avatar: imagePreview || currentUser.avatar
-      };
-      
-      if (onUpdate) {
-        onUpdate(updatedData);
-      }
-      
-      showAlert('Perfil actualizado correctamente', 'success');
-      
-      setTimeout(() => {
-        onClose();
-        setLoading(false);
-      }, 1000);
-      
-    } catch (error) {
-      showAlert('Error al actualizar el perfil', 'danger');
+    // Simulación de guardado
+    setTimeout(() => {
       setLoading(false);
-    }
-  };
-
-  const showAlert = (message, type) => {
-    setAlert({ show: true, message, type });
-    setTimeout(() => setAlert({ show: false, message: '', type: '' }), 5000);
+      setAlert({
+        show: true,
+        message: 'Perfil actualizado correctamente',
+        type: 'success'
+      });
+    }, 1500);
   };
 
   const handleTriggerFileInput = () => {
@@ -238,12 +194,12 @@ const ProfileModal = ({ show, onClose, userData, onUpdate }) => {
                 <CCol md={6}>
                   <div className="mb-3">
                     <CFormLabel htmlFor="name">
-                      Nombre Completo *
+                      Nombre Completo
                     </CFormLabel>
                     <CFormInput
                       type="text"
                       id="name"
-                      value={formData.name || currentUser.name}
+                      value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                       placeholder="Ingresa tu nombre completo"
                     />
@@ -253,12 +209,12 @@ const ProfileModal = ({ show, onClose, userData, onUpdate }) => {
                 <CCol md={6}>
                   <div className="mb-3">
                     <CFormLabel htmlFor="email">
-                      Correo Electrónico *
+                      Correo Electrónico
                     </CFormLabel>
                     <CFormInput
                       type="email"
                       id="email"
-                      value={formData.email || currentUser.email}
+                      value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="tu.email@ejemplo.com"
                     />
@@ -275,7 +231,7 @@ const ProfileModal = ({ show, onClose, userData, onUpdate }) => {
                     <CFormInput
                       type="tel"
                       id="phone"
-                      value={formData.phone || currentUser.phone}
+                      value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
                       placeholder="+1 234 567 8900"
                     />
@@ -289,7 +245,7 @@ const ProfileModal = ({ show, onClose, userData, onUpdate }) => {
                     </CFormLabel>
                     <CFormSelect
                       id="role"
-                      value={formData.role || currentUser.role}
+                      value={formData.role}
                       onChange={(e) => handleInputChange('role', e.target.value)}
                     >
                       <option value="admin">Administrador</option>
@@ -308,7 +264,7 @@ const ProfileModal = ({ show, onClose, userData, onUpdate }) => {
                   as="textarea"
                   rows="3"
                   id="bio"
-                  value={formData.bio || currentUser.bio}
+                  value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   placeholder="Describe tu experiencia..."
                 />
