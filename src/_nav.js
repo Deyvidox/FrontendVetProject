@@ -77,7 +77,7 @@ const _nav = [
         name:'Inventory',
         to:'/Inventory',
         icon:<CIcon icon={cilCalculator} customClassName="nav-icon" />,
-    }
+    },
 
   {
   component: CNavGroup,
