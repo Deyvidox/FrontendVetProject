@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
-import '../../css/appointment/AppointmentList.css';
+import '../../css/appointment/appointmentList.css';
 
 // Clase CSS según estado
 const stateClass = (estado) => `tag tag-${estado.toLowerCase()}`;
