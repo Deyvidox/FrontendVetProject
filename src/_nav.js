@@ -96,6 +96,7 @@ const _nav = [
       to: '/pets/mypets',
       icon: <CIcon icon={cilPaw} customClassName="nav-icon" />,
     },
+    
     {
       component: CNavItem,
       name: 'Pets List',
