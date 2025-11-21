@@ -37,8 +37,25 @@ const AppSidebar = () => {
     >
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand to="/">
-          <CIcon customClassName="sidebar-brand-full" icon={logo} height={32} />
-          <CIcon customClassName="sidebar-brand-narrow" icon={sygnet} height={32} />
+          {/* Logo completo */}
+          <div className="sidebar-brand-full" style={{ 
+            color: 'white', 
+            fontSize: '1.25rem', 
+            fontWeight: 'bold',
+            padding: '0.5rem 0',
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            🐾 VetProject
+          </div>
+          
+          {/* Logo reducido */}
+          <div className="sidebar-brand-narrow" style={{ 
+            color: 'white', 
+            fontSize: '1.5rem'
+          }}>
+            🐾
+          </div>
         </CSidebarBrand>
         <CCloseButton
           className="d-lg-none"
