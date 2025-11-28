@@ -7,20 +7,20 @@
    🎨 Paleta de colores personalizada
    =============================================== */
 :root {
-  --bg-start: #d0f0ed;
-  --bg-end: #e0f7f4;
+  --bg-start: #168bcf;
+  --bg-end: #285bdb;
   --card-bg: rgba(255, 255, 255, 0.95);
   --card-border: rgba(255,255,255,0.3);
   --card-shadow: rgba(0, 0, 0, 0.25);
   --text: #1f2937;
   --muted: #4b5563;
   --input-bg: rgba(255,255,255,0.95);
-  --input-border: #06b174;
+  --input-border: #2144e3;
   --input-focus-shadow: rgba(6,177,116,0.35);
-  --primary: #06b174;
-  --primary-hover: #00a364;
-  --primary-glow: rgba(6,177,116,0.6);
-  --link: #3b82f6;
+  --primary: #0c06b1;
+  --primary-hover: #1f2af6;
+  --primary-glow: rgba(7, 52, 185, 0.6);
+  --link: #0f55c5;
   --promo-gradient: linear-gradient(135deg, #06b174, #3b82f6);
 }
 

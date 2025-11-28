@@ -1,67 +1,63 @@
+// AppointmentForm.jsx
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form'; // Hook para manejo de formularios
-import { zodResolver } from '@hookform/resolvers/zod'; // Para validar con zod
-import AlertModal from './AlertModal'; // Modal para mostrar alertas
-import { appointmentSchema } from './AppointmentSchema'; // Esquema de validación
-import '../../css/appointment/appointmentsPage.css'; // Estilos de la página
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import AlertModal from './AlertModal';
+import { appointmentSchema, defaultAppointmentValues } from './AppointmentSchema';
+import '../../css/Inventory/inventory.css';
 
-// Configuración de Cloudinary para subir imágenes (si se usa upload real)
+// Configuración de Cloudinary (si la usarás después)
 const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/<tu_cloud_name>/image/upload';
 const CLOUDINARY_UPLOAD_PRESET = '<tu_unsigned_preset>';
 
-// Componente del formulario de citas
+// Props:
+// onSubmit(payload) -> llama al padre para crear/editar
+// mascotas, veterinarios -> listas para los selects (mock o reales)
+// appointments -> lista actual (para evitar doble booking)
+// initialValues -> si viene edición
+// onClose() -> cerrar modal si viene de una modal contenedora
 const AppointmentForm = ({
-  onSubmit,           // Función para enviar los datos al padre
-  mascotas = [],      // Lista de mascotas disponibles
-  veterinarios = [],  // Lista de veterinarios disponibles
-  appointments = [],  // Lista de citas actuales (para validar conflictos)
-  initialValues = {   // Valores iniciales (nuevo o edición)
-    mascota_id: '',
-    veterinario_id: '',
-    fecha_cita: '',
-    estado: 'Pendiente',
-    notas: '',
-    evidencia_url: '',
-  }
+  onSubmit,
+  mascotas = [],
+  veterinarios = [],
+  appointments = [],
+  initialValues = defaultAppointmentValues,
+  onClose,
 }) => {
-  // Hook principal de react-hook-form
   const {
-    register,         // Registra inputs
-    handleSubmit,     // Función que maneja submit con validación
-    formState: { errors }, // Errores de validación
-    watch,            // Observar cambios de valores
-    setValue,         // Para actualizar valores manualmente
-    reset,            // Resetea valores del formulario
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue,
+    reset,
   } = useForm({
-    resolver: zodResolver(appointmentSchema), // Valida usando zod
-    defaultValues: initialValues,             // Inicializa el formulario
+    resolver: zodResolver(appointmentSchema),
+    defaultValues: initialValues,
   });
 
-  // Cuando cambian los valores iniciales, resetea el formulario
   useEffect(() => {
     reset(initialValues);
   }, [initialValues, reset]);
 
-  // Observamos valores para condicionales
-  const estadoValue = watch('estado');       // Estado actual del formulario
-  const fechaValue = watch('fecha_cita');    // Fecha seleccionada
-  const vetValue = watch('veterinario_id');  // Vet seleccionado
+  const estadoValue = watch('estado');
+  const fechaValue = watch('fecha_cita');
+  const vetValue = watch('veterinario_id');
 
-  // Validación extra: prevenir doble booking (mismo vet y misma hora exacta)
   const isDoubleBooked = () => {
     if (!vetValue || !fechaValue) return false;
     const targetTime = new Date(fechaValue).getTime();
-    return appointments.some(a => a.veterinario_id === Number(vetValue) && new Date(a.fecha_cita).getTime() === targetTime);
+    return appointments.some(
+      (a) => a.veterinario_id === Number(vetValue) && new Date(a.fecha_cita).getTime() === targetTime
+    );
   };
 
-  // Estados para mostrar modal de alerta
   const [modalOpen, setModalOpen] = React.useState(false);
-  const [modalType, setModalType] = React.useState('success'); // success / error
-  const [modalMsg, setModalMsg] = React.useState('');           // Mensaje a mostrar
+  const [modalType, setModalType] = React.useState('success');
+  const [modalMsg, setModalMsg] = React.useState('');
 
-  // Función que se ejecuta al enviar el formulario
   const submitHandler = (data) => {
-    // Si hay doble booking, mostrar error
+    // doble booking
     if (isDoubleBooked()) {
       setModalType('error');
       setModalMsg('El veterinario ya tiene una cita en ese horario.');
@@ -69,24 +65,25 @@ const AppointmentForm = ({
       return;
     }
 
-    // Normalizar tipos antes de enviar
     const payload = {
       ...data,
       mascota_id: Number(data.mascota_id),
       veterinario_id: Number(data.veterinario_id),
-      fecha_cita: new Date(data.fecha_cita).toISOString(), // Formato ISO
+      // si el usuario ya envío ISO, lo aceptamos; si viene datetime-local, lo convertimos
+      fecha_cita: new Date(data.fecha_cita).toISOString(),
     };
 
-    // Llamamos al padre con los datos
     onSubmit(payload);
 
-    // Mostrar modal de éxito
     setModalType('success');
     setModalMsg('Cita registrada correctamente.');
     setModalOpen(true);
+
+    // reset del formulario y cierre si procede (igual que InventoryForm)
+    reset(defaultAppointmentValues);
+    if (onClose) onClose();
   };
 
-  // Función para subir imágenes a Cloudinary
   const handleCloudinaryUpload = async (file) => {
     if (!file) return;
     try {
@@ -98,7 +95,7 @@ const AppointmentForm = ({
       const json = await res.json();
 
       if (json.secure_url) {
-        setValue('evidencia_url', json.secure_url); // Guardar URL en el formulario
+        setValue('evidencia_url', json.secure_url);
         setModalType('success');
         setModalMsg('Imagen subida correctamente.');
         setModalOpen(true);
@@ -113,14 +110,13 @@ const AppointmentForm = ({
   };
 
   return (
-    // Formulario principal
     <form onSubmit={handleSubmit(submitHandler)} className="appointment-form">
       <div className="auth-header">
         <h1>Crear/Editar Cita</h1>
         <p>Completa los datos para agendar tu cita.</p>
       </div>
 
-      {/* Selector de mascota */}
+      {/* Mascota */}
       <label>Mascota</label>
       <select {...register('mascota_id')}>
         <option value="">Selecciona una mascota</option>
@@ -130,7 +126,7 @@ const AppointmentForm = ({
       </select>
       {errors.mascota_id && <span className="text-danger">{errors.mascota_id.message}</span>}
 
-      {/* Selector de veterinario */}
+      {/* Veterinario */}
       <label>Veterinario</label>
       <select {...register('veterinario_id')}>
         <option value="">Selecciona un veterinario</option>
@@ -140,12 +136,12 @@ const AppointmentForm = ({
       </select>
       {errors.veterinario_id && <span className="text-danger">{errors.veterinario_id.message}</span>}
 
-      {/* Fecha y hora de la cita */}
+      {/* Fecha y hora */}
       <label>Fecha y hora de la cita</label>
       <input type="datetime-local" {...register('fecha_cita')} />
       {errors.fecha_cita && <span className="text-danger">{errors.fecha_cita.message}</span>}
 
-      {/* Estado de la cita */}
+      {/* Estado */}
       <label>Estado</label>
       <select {...register('estado')}>
         <option value="Pendiente">Pendiente</option>
@@ -154,27 +150,27 @@ const AppointmentForm = ({
         <option value="Completada">Completada</option>
       </select>
 
-      {/* Notas de la cita */}
+      {/* Notas */}
       <label>Notas</label>
-      <textarea {...register('notas')} placeholder={estadoValue === 'Cancelada' ? 'Explica el motivo de la cancelación' : 'Notas de la cita'} />
+      <textarea
+        {...register('notas')}
+        placeholder={estadoValue === 'Cancelada' ? 'Explica el motivo de la cancelación' : 'Notas de la cita'}
+      />
       {errors.notas && <span className="text-danger">{errors.notas.message}</span>}
 
-      {/* Evidencia (URL o archivo) */}
+      {/* Evidencia */}
       <label>Evidencia (imagen)</label>
       <div className="upload-row">
         <input type="url" placeholder="URL de la imagen (opcional)" {...register('evidencia_url')} />
         <input type="file" accept="image/*" onChange={(e) => handleCloudinaryUpload(e.target.files?.[0])} />
       </div>
 
-      {/* Mensaje de conflicto si hay doble booking */}
       {isDoubleBooked() && (
         <span className="text-danger">Conflicto: el veterinario ya tiene una cita en ese horario.</span>
       )}
 
-      {/* Botón principal */}
       <button type="submit" className="btn">Guardar Cita</button>
 
-      {/* Modal para mostrar alertas */}
       <AlertModal
         isOpen={modalOpen}
         message={modalMsg}
