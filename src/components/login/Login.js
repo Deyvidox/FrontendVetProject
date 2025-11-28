@@ -1,10 +1,3 @@
-// ===============================================
-// 🧩 Componente de Login
-// Aquí manejo el acceso del usuario, verifico si
-// coincide con los datos guardados en LocalStorage
-// y muestro mensajes de error si no coincide.
-// ===============================================
-
 import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -25,6 +18,8 @@ import { cilLockLocked, cilUser } from '@coreui/icons'
 // Importo los estilos personalizados del login
 import '../../css/login/Login.css'
 
+const API = "http://localhost:3001";
+
 const Login = () => {
   const location = useLocation()
   const navigate = useNavigate()
@@ -32,8 +27,10 @@ const Login = () => {
   // Si el usuario viene del registro, recupero sus datos
   const dataFromRegister = location.state || {}
 
-  // Estado del usuario
-  const [usuario, setUsuario] = useState(dataFromRegister.usuario || dataFromRegister.correo || '')
+  // Estado del usuario (username o correo)
+  const [usuario, setUsuario] = useState(
+    dataFromRegister.usuario || dataFromRegister.correo || ''
+  )
 
   // Estado de contraseña
   const [password, setPassword] = useState('')
@@ -41,34 +38,48 @@ const Login = () => {
   // Estado para mostrar / ocultar la contraseña
   const [showPassword, setShowPassword] = useState(false)
 
-  // Estado para mostrar mensajes de error
+  // Estado de error
   const [error, setError] = useState('')
 
   // ===========================
   // 🔐 Manejar proceso de Login
   // ===========================
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
+    setError("")
 
-    // Recupero el usuario guardado en el registro
-    const usuarioRegistrado = JSON.parse(localStorage.getItem('usuarioRegistrado'))
+    try {
+      // CONSULTA CORRECTA: ahora usamos /clientes
+      const res = await fetch(`${API}/clientes`)
+      const usuarios = await res.json()
 
-    if (!usuarioRegistrado) {
-      setError('No hay usuarios registrados. Por favor regístrate.')
-      return
-    }
+      // Buscar si existe un usuario con username o email
+      const usuarioEncontrado = usuarios.find(
+        (u) =>
+          (u.usuario === usuario || u.correo === usuario) &&
+          u.contrasena === password
+      )
 
-    // Validación del login
-    const accesoCorrecto =
-      (usuario === usuarioRegistrado.usuario || usuario === usuarioRegistrado.correo) &&
-      password === usuarioRegistrado.contrasena
+      if (usuarioEncontrado) {
+        alert(`Bienvenido, ${usuarioEncontrado.usuario} ✅`)
 
-    if (accesoCorrecto) {
-      alert(`Bienvenido, ${usuarioRegistrado.usuario} ✅`)
-      setError('')
-      navigate('/dashboard')
-    } else {
-      setError('Usuario o contraseña incorrectos.')
+        // Guardar un mínimo de datos del usuario logueado
+        localStorage.setItem(
+          "usuarioLogueado",
+          JSON.stringify({
+            id: usuarioEncontrado.id,
+            usuario: usuarioEncontrado.usuario,
+            correo: usuarioEncontrado.correo,
+          })
+        )
+
+        navigate('/dashboard')
+      } else {
+        setError("Usuario o contraseña incorrectos.")
+      }
+
+    } catch (err) {
+      setError("Error al conectar con el servidor.")
     }
   }
 
@@ -79,19 +90,17 @@ const Login = () => {
           <CCol md={8}>
             <CCard className="auth-card">
 
-              {/* Panel izquierdo con el formulario de acceso */}
+              {/* Panel izquierdo con el formulario */}
               <CCardBody className="auth-card-inner">
                 <CForm className="auth-form" onSubmit={handleLogin}>
 
-                  {/* Encabezado del formulario */}
+                  {/* Encabezado */}
                   <div className="auth-header">
                     <h1>Acceso</h1>
                     <p>Inicia sesión en tu cuenta</p>
                   </div>
 
-                  {/* ===========================
-                      🧑 Usuario / Correo
-                     =========================== */}
+                  {/* Usuario / Correo */}
                   <CInputGroup className="mb-3">
                     <CInputGroupText>
                       <CIcon icon={cilUser} />
@@ -104,15 +113,12 @@ const Login = () => {
                     />
                   </CInputGroup>
 
-                  {/* ===========================
-                      🔒 Contraseña con botón dentro
-                     =========================== */}
+                  {/* Contraseña */}
                   <CInputGroup className="mb-4 password-wrapper">
                     <CInputGroupText>
                       <CIcon icon={cilLockLocked} />
                     </CInputGroupText>
 
-                    {/* Input de contraseña */}
                     <CFormInput
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Password"
@@ -121,7 +127,7 @@ const Login = () => {
                       onChange={(e) => setPassword(e.target.value)}
                     />
 
-                    {/* Botón pequeño dentro del input */}
+                    {/* Botón mostrar contraseña */}
                     <button
                       type="button"
                       className="btn-ver-password"
@@ -134,9 +140,7 @@ const Login = () => {
                   {/* Mensaje de error */}
                   {error && <p className="text-danger">{error}</p>}
 
-                  {/* ===========================
-                      🔘 Botones de acción
-                     =========================== */}
+                  {/* Botones */}
                   <CRow>
                     <CCol xs={6}>
                       <CButton color="primary" type="submit">
@@ -144,7 +148,6 @@ const Login = () => {
                       </CButton>
                     </CCol>
 
-                    {/* Enlace recuperación de contraseña */}
                     <CCol xs={6} className="text-right">
                       <CButton
                         color="link"
@@ -157,13 +160,13 @@ const Login = () => {
                 </CForm>
               </CCardBody>
 
-              {/* Panel derecho con sección de registro */}
+              {/* Panel derecho */}
               <CCard className="auth-card-right">
                 <CCardBody>
                   <h2>Registro</h2>
                   <p>
-                    "Únete a nuestra comunidad y cuida de tus mascotas con los mejores profesionales.
-                     Regístrate ahora para acceder a nuestros servicios exclusivos."
+                    Únete a nuestra comunidad y cuida de tus mascotas con los mejores profesionales.
+                    Regístrate ahora para acceder a nuestros servicios exclusivos.
                   </p>
                   <Link to="/register">
                     <CButton className="mt-3">¡Regístrate!</CButton>
