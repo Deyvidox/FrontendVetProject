@@ -1,6 +1,5 @@
-import React from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   CCloseButton,
   CSidebar,
@@ -8,21 +7,19 @@ import {
   CSidebarFooter,
   CSidebarHeader,
   CSidebarToggler,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-
-import { AppSidebarNav } from './AppSidebarNav'
-
-import { logo } from 'src/assets/brand/logo'
-import { sygnet } from 'src/assets/brand/sygnet'
+} from '@coreui/react';
+import { AppSidebarNav } from './AppSidebarNav';
 
 // sidebar nav config
-import navigation from '../_nav'
+import navigation from '../_nav';
+
+// Importar la imagen directamente
+import logo from '../assets/images/logovet.png';
 
 const AppSidebar = () => {
-  const dispatch = useDispatch()
-  const unfoldable = useSelector((state) => state.sidebarUnfoldable)
-  const sidebarShow = useSelector((state) => state.sidebarShow)
+  const dispatch = useDispatch();
+  const unfoldable = useSelector(state => state.sidebarUnfoldable);
+  const sidebarShow = useSelector(state => state.sidebarShow);
 
   return (
     <CSidebar
@@ -31,31 +28,21 @@ const AppSidebar = () => {
       position="fixed"
       unfoldable={unfoldable}
       visible={sidebarShow}
-      onVisibleChange={(visible) => {
-        dispatch({ type: 'set', sidebarShow: visible })
+      onVisibleChange={visible => {
+        dispatch({ type: 'set', sidebarShow: visible });
       }}
     >
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand to="/">
-          {/* Logo completo */}
-          <div className="sidebar-brand-full" style={{ 
-            color: 'white', 
-            fontSize: '1.25rem', 
-            fontWeight: 'bold',
-            padding: '0.5rem 0',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
-            🐾 VetProject
-          </div>
-          
-          {/* Logo reducido */}
-          <div className="sidebar-brand-narrow" style={{ 
-            color: 'white', 
-            fontSize: '1.5rem'
-          }}>
-            🐾
-          </div>
+          <img
+            src={logo} // Usar la importación directa
+            alt="Veterinary Clinic Logo"
+            style={{ 
+              maxWidth: '100%',
+              height: 'auto',
+              objectFit: 'contain'
+            }}
+          />
         </CSidebarBrand>
         <CCloseButton
           className="d-lg-none"
@@ -66,11 +53,13 @@ const AppSidebar = () => {
       <AppSidebarNav items={navigation} />
       <CSidebarFooter className="border-top d-none d-lg-flex">
         <CSidebarToggler
-          onClick={() => dispatch({ type: 'set', sidebarUnfoldable: !unfoldable })}
+          onClick={() =>
+            dispatch({ type: 'set', sidebarUnfoldable: !unfoldable })
+          }
         />
       </CSidebarFooter>
     </CSidebar>
-  )
-}
+  );
+};
 
-export default React.memo(AppSidebar)
+export default React.memo(AppSidebar);

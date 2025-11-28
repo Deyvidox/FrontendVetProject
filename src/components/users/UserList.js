@@ -15,7 +15,8 @@ import {
   CFormInput,
   CInputGroupText,
   CPagination,
-  CPaginationItem
+  CPaginationItem,
+  CAlert
 } from '@coreui/react';
 import { cilSearch, cilUser, cilPencil, cilTrash } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
@@ -24,38 +25,55 @@ import '../../css/users/UserList.css';
 const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const usersPerPage = 5;
 
-  // Filtrar usuarios basado en la búsqueda
+  // Filter users based on search
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.department?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Paginación
+  // Pagination
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
-  const handleEdit = (userId) => {
-    console.log('Editar usuario:', userId);
-    // Aquí podrías abrir un modal o navegar a edición
-    alert(`Editar usuario ID: ${userId}`);
+  const handleEdit = async (userId) => {
+    console.log('Edit user:', userId);
+    // Aquí podrías abrir un modal de edición
+    try {
+      setLoading(true);
+      // Lógica para editar usuario
+    } catch (error) {
+      setError('Error editing user');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (userId) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
-      onUserDelete(userId);
+  const handleDelete = async (userId) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        setLoading(true);
+        await onUserDelete(userId);
+      } catch (error) {
+        setError('Error deleting user');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      active: { color: 'success', text: 'Activo' },
-      inactive: { color: 'secondary', text: 'Inactivo' },
-      suspended: { color: 'warning', text: 'Suspendido' }
+      active: { color: 'success', text: 'Active' },
+      inactive: { color: 'secondary', text: 'Inactive' },
+      suspended: { color: 'warning', text: 'Suspended' }
     };
     
     const config = statusConfig[status] || { color: 'secondary', text: status };
@@ -64,9 +82,11 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
 
   const getRoleBadge = (role) => {
     const roleConfig = {
-      Administrador: 'danger',
-      Editor: 'warning',
-      Usuario: 'primary'
+      Administrator: 'danger',
+      Veterinarian: 'warning',
+      Client: 'primary',
+      Editor: 'info',
+      User: 'secondary'
     };
     
     return <CBadge color={roleConfig[role] || 'secondary'}>{role}</CBadge>;
@@ -78,12 +98,18 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
         <div className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0">
             <CIcon icon={cilUser} className="me-2" />
-            Listado de Usuarios
+            Users List
           </h5>
         </div>
       </CCardHeader>
       <CCardBody>
-        {/* Barra de búsqueda */}
+        {error && (
+          <CAlert color="danger" className="mb-3">
+            {error}
+          </CAlert>
+        )}
+
+        {/* Search Bar */}
         <div className="user-search-container">
           <CInputGroup>
             <CInputGroupText className="user-search-icon">
@@ -91,29 +117,31 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
             </CInputGroupText>
             <CFormInput
               className="user-search-input"
-              placeholder="Buscar por nombre, email o rol..."
+              placeholder="Search by name, email, role or department..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1); // Resetear a primera página al buscar
+                setCurrentPage(1);
               }}
             />
           </CInputGroup>
         </div>
 
-        {/* Tabla de usuarios */}
+        {/* Users Table */}
         <div className="user-table-container">
           <CTable responsive striped hover className="user-table">
             <CTableHead>
               <CTableRow>
                 <CTableHeaderCell>ID</CTableHeaderCell>
-                <CTableHeaderCell>Nombre</CTableHeaderCell>
+                <CTableHeaderCell>Name</CTableHeaderCell>
                 <CTableHeaderCell>Email</CTableHeaderCell>
-                <CTableHeaderCell>Teléfono</CTableHeaderCell>
-                <CTableHeaderCell>Rol</CTableHeaderCell>
-                <CTableHeaderCell>Estado</CTableHeaderCell>
-                <CTableHeaderCell>Fecha Creación</CTableHeaderCell>
-                <CTableHeaderCell className="text-center">Acciones</CTableHeaderCell>
+                <CTableHeaderCell>Phone</CTableHeaderCell>
+                <CTableHeaderCell>Role</CTableHeaderCell>
+                <CTableHeaderCell>Department</CTableHeaderCell>
+                <CTableHeaderCell>Position</CTableHeaderCell>
+                <CTableHeaderCell>Status</CTableHeaderCell>
+                <CTableHeaderCell>Created At</CTableHeaderCell>
+                <CTableHeaderCell className="text-center">Actions</CTableHeaderCell>
               </CTableRow>
             </CTableHead>
             <CTableBody>
@@ -129,9 +157,11 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
                     <CTableDataCell>{user.email}</CTableDataCell>
                     <CTableDataCell>{user.phone}</CTableDataCell>
                     <CTableDataCell>{getRoleBadge(user.role)}</CTableDataCell>
+                    <CTableDataCell>{user.department}</CTableDataCell>
+                    <CTableDataCell>{user.position}</CTableDataCell>
                     <CTableDataCell>{getStatusBadge(user.status)}</CTableDataCell>
                     <CTableDataCell>
-                      {new Date(user.createdAt).toLocaleDateString('es-ES')}
+                      {new Date(user.createdAt).toLocaleDateString('en-US')}
                     </CTableDataCell>
                     <CTableDataCell>
                       <div className="user-actions-container">
@@ -140,6 +170,7 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
                           size="sm"
                           className="user-action-btn user-action-btn-edit"
                           onClick={() => handleEdit(user.id)}
+                          disabled={loading}
                         >
                           <CIcon icon={cilPencil} />
                         </CButton>
@@ -148,6 +179,7 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
                           size="sm"
                           className="user-action-btn user-action-btn-delete"
                           onClick={() => handleDelete(user.id)}
+                          disabled={loading}
                         >
                           <CIcon icon={cilTrash} />
                         </CButton>
@@ -157,14 +189,14 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
                 ))
               ) : (
                 <CTableRow>
-                  <CTableDataCell colSpan="8" className="text-center py-4">
+                  <CTableDataCell colSpan="10" className="text-center py-4">
                     <div className="users-empty-state">
                       <CIcon icon={cilUser} className="users-empty-state-icon" />
-                      <h5>No se encontraron usuarios</h5>
+                      <h5>No users found</h5>
                       <p className="text-muted">
                         {searchTerm 
-                          ? 'No hay usuarios que coincidan con tu búsqueda' 
-                          : 'No hay usuarios registrados en el sistema'
+                          ? 'No users match your search' 
+                          : 'No users registered in the system'
                         }
                       </p>
                     </div>
@@ -175,7 +207,7 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
           </CTable>
         </div>
 
-        {/* Paginación */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="user-pagination">
             <CPagination align="center">
@@ -183,7 +215,7 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(currentPage - 1)}
               >
-                Anterior
+                Previous
               </CPaginationItem>
               
               {[...Array(totalPages)].map((_, index) => (
@@ -200,16 +232,16 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(currentPage + 1)}
               >
-                Siguiente
+                Next
               </CPaginationItem>
             </CPagination>
           </div>
         )}
 
-        {/* Información de paginación */}
+        {/* Pagination Info */}
         <div className="user-pagination-info text-center mt-2">
-          Mostrando {currentUsers.length} de {filteredUsers.length} usuarios
-          {searchTerm && ` (filtrados de ${users.length} total)`}
+          Showing {currentUsers.length} of {filteredUsers.length} users
+          {searchTerm && ` (filtered from ${users.length} total)`}
         </div>
       </CCardBody>
     </CCard>

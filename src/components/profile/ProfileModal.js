@@ -27,6 +27,8 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
     phone: '',
     role: '',
     bio: '',
+    department: '',
+    position: '',
     ...userData
   });
   
@@ -68,7 +70,7 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
       setLoading(false);
       setAlert({
         show: true,
-        message: 'Perfil actualizado correctamente',
+        message: 'Profile updated successfully',
         type: 'success'
       });
     }, 1500);
@@ -88,11 +90,8 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
       <CModalHeader>
         <CModalTitle>
           <CIcon icon={cilUser} className="me-2" />
-          Editar Perfil
+          Edit Profile
         </CModalTitle>
-        <CButton color="transparent" size="sm" onClick={onClose}>
-          <CIcon icon={cilX} />
-        </CButton>
       </CModalHeader>
       
       <CModalBody>
@@ -181,7 +180,7 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
                 
                 <div className="mt-2">
                   <small className="text-muted">
-                    PNG, JPG hasta 5MB
+                    PNG, JPG up to 5MB
                   </small>
                 </div>
               </CCardBody>
@@ -194,14 +193,14 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
                 <CCol md={6}>
                   <div className="mb-3">
                     <CFormLabel htmlFor="name">
-                      Nombre Completo
+                      Full Name
                     </CFormLabel>
                     <CFormInput
                       type="text"
                       id="name"
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      placeholder="Ingresa tu nombre completo"
+                      placeholder="Enter your full name"
                     />
                   </div>
                 </CCol>
@@ -209,14 +208,14 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
                 <CCol md={6}>
                   <div className="mb-3">
                     <CFormLabel htmlFor="email">
-                      Correo Electrónico
+                      Email
                     </CFormLabel>
                     <CFormInput
                       type="email"
                       id="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="tu.email@ejemplo.com"
+                      placeholder="your.email@example.com"
                     />
                   </div>
                 </CCol>
@@ -226,7 +225,7 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
                 <CCol md={6}>
                   <div className="mb-3">
                     <CFormLabel htmlFor="phone">
-                      Teléfono
+                      Phone
                     </CFormLabel>
                     <CFormInput
                       type="tel"
@@ -241,24 +240,58 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
                 <CCol md={6}>
                   <div className="mb-3">
                     <CFormLabel htmlFor="role">
-                      Rol
+                      Role
                     </CFormLabel>
                     <CFormSelect
                       id="role"
                       value={formData.role}
                       onChange={(e) => handleInputChange('role', e.target.value)}
                     >
-                      <option value="admin">Administrador</option>
-                      <option value="user">Usuario</option>
-                      <option value="editor">Editor</option>
+                      <option value="Administrator">Administrator</option>
+                      <option value="Veterinarian">Veterinarian</option>
+                      <option value="Client">Client</option>
+                      <option value="Editor">Editor</option>
+                      <option value="User">User</option>
                     </CFormSelect>
+                  </div>
+                </CCol>
+              </CRow>
+
+              <CRow>
+                <CCol md={6}>
+                  <div className="mb-3">
+                    <CFormLabel htmlFor="department">
+                      Department
+                    </CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="department"
+                      value={formData.department}
+                      onChange={(e) => handleInputChange('department', e.target.value)}
+                      placeholder="Enter department"
+                    />
+                  </div>
+                </CCol>
+                
+                <CCol md={6}>
+                  <div className="mb-3">
+                    <CFormLabel htmlFor="position">
+                      Position
+                    </CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="position"
+                      value={formData.position}
+                      onChange={(e) => handleInputChange('position', e.target.value)}
+                      placeholder="Enter position"
+                    />
                   </div>
                 </CCol>
               </CRow>
               
               <div className="mb-3">
                 <CFormLabel htmlFor="bio">
-                  Biografía
+                  Biography
                 </CFormLabel>
                 <CFormInput
                   as="textarea"
@@ -266,7 +299,7 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
                   id="bio"
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
-                  placeholder="Describe tu experiencia..."
+                  placeholder="Describe your experience..."
                 />
               </div>
             </CForm>
@@ -281,7 +314,7 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
           disabled={loading}
         >
           <CIcon icon={cilX} className="me-1" />
-          Cancelar
+          Cancel
         </CButton>
         <CButton 
           color="primary" 
@@ -291,12 +324,12 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
           {loading ? (
             <>
               <CSpinner size="sm" className="me-1" />
-              Guardando...
+              Saving...
             </>
           ) : (
             <>
               <CIcon icon={cilCheckCircle} className="me-1" />
-              Guardar Cambios
+              Save Changes
             </>
           )}
         </CButton>

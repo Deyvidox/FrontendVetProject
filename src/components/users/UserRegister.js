@@ -17,6 +17,8 @@ import { cilUser, cilSave, cilReload } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import '../../css/users/UserRegister.css'
 
+const API_URL = "http://localhost:3001";
+
 const UserRegister = () => {
   const [loading, setLoading] = useState(false)
   const [alert, setAlert] = useState({ show: false, message: '', type: '' })
@@ -25,9 +27,35 @@ const UserRegister = () => {
     e.preventDefault()
     setLoading(true)
 
+    const formData = {
+      name: e.target.name.value,
+      email: e.target.email.value,
+      phone: e.target.phone.value,
+      role: e.target.role.value,
+      department: e.target.department.value,
+      position: e.target.position.value,
+      bio: e.target.bio.value,
+      username: e.target.username.value,
+      password: e.target.password.value,
+      status: 'active',
+      avatar: '',
+      createdAt: new Date().toISOString().split('T')[0]
+    }
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const response = await fetch(`${API_URL}/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Error registering user')
+      }
+
+      const createdUser = await response.json()
       
       setAlert({
         show: true,
@@ -39,6 +67,7 @@ const UserRegister = () => {
       e.target.reset()
       
     } catch (error) {
+      console.error('Error registering user:', error)
       setAlert({
         show: true,
         message: 'Error registering user. Please try again.',
@@ -85,6 +114,7 @@ const UserRegister = () => {
                     <CFormInput
                       type="text"
                       id="name"
+                      name="name"
                       className="register-form-input"
                       placeholder="Enter full name"
                       required
@@ -99,6 +129,7 @@ const UserRegister = () => {
                     <CFormInput
                       type="email"
                       id="email"
+                      name="email"
                       className="register-form-input"
                       placeholder="user@example.com"
                       required
@@ -116,6 +147,7 @@ const UserRegister = () => {
                     <CFormInput
                       type="tel"
                       id="phone"
+                      name="phone"
                       className="register-form-input"
                       placeholder="+1 234 567 8900"
                     />
@@ -123,15 +155,17 @@ const UserRegister = () => {
                 </CCol>
                 <CCol md={6}>
                   <div className="mb-3">
-                    <CFormLabel htmlFor="role" className="register-form-label required-field">
-                      Role
+                    <CFormLabel htmlFor="username" className="register-form-label required-field">
+                      Username
                     </CFormLabel>
-                    <CFormSelect id="role" className="register-form-select" required>
-                      <option value="">Select a role</option>
-                      <option value="admin">Administrator</option>
-                      <option value="user">User</option>
-                      <option value="editor">Editor</option>
-                    </CFormSelect>
+                    <CFormInput
+                      type="text"
+                      id="username"
+                      name="username"
+                      className="register-form-input"
+                      placeholder="Enter username"
+                      required
+                    />
                   </div>
                 </CCol>
               </CRow>
@@ -146,17 +180,36 @@ const UserRegister = () => {
               <CRow>
                 <CCol md={6}>
                   <div className="mb-3">
+                    <CFormLabel htmlFor="role" className="register-form-label required-field">
+                      Role
+                    </CFormLabel>
+                    <CFormSelect id="role" name="role" className="register-form-select" required>
+                      <option value="">Select a role</option>
+                      <option value="Administrator">Administrator</option>
+                      <option value="Veterinarian">Veterinarian</option>
+                      <option value="Client">Client</option>
+                      <option value="Editor">Editor</option>
+                      <option value="User">User</option>
+                    </CFormSelect>
+                  </div>
+                </CCol>
+                <CCol md={6}>
+                  <div className="mb-3">
                     <CFormLabel htmlFor="department" className="register-form-label">
                       Department
                     </CFormLabel>
                     <CFormInput
                       type="text"
                       id="department"
+                      name="department"
                       className="register-form-input"
                       placeholder="Department"
                     />
                   </div>
                 </CCol>
+              </CRow>
+
+              <CRow>
                 <CCol md={6}>
                   <div className="mb-3">
                     <CFormLabel htmlFor="position" className="register-form-label">
@@ -165,8 +218,27 @@ const UserRegister = () => {
                     <CFormInput
                       type="text"
                       id="position"
+                      name="position"
                       className="register-form-input"
                       placeholder="User position"
+                    />
+                  </div>
+                </CCol>
+              </CRow>
+
+              <CRow>
+                <CCol md={12}>
+                  <div className="mb-3">
+                    <CFormLabel htmlFor="bio" className="register-form-label">
+                      Biography
+                    </CFormLabel>
+                    <CFormInput
+                      as="textarea"
+                      rows="3"
+                      id="bio"
+                      name="bio"
+                      className="register-form-input"
+                      placeholder="User biography and experience..."
                     />
                   </div>
                 </CCol>
@@ -188,6 +260,7 @@ const UserRegister = () => {
                     <CFormInput
                       type="password"
                       id="password"
+                      name="password"
                       className="register-form-input"
                       placeholder="Enter password"
                       required
@@ -233,4 +306,4 @@ const UserRegister = () => {
   )
 }
 
-export default UserRegister
+export default UserRegister;
