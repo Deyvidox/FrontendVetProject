@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CCard,
   CCardHeader,
@@ -18,6 +18,8 @@ import { cilPlus, cilCheckCircle } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import '../../css/pets/RegisterPet.css';
 
+const API_URL = "http://localhost:3001";
+
 const RegisterPet = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -26,10 +28,13 @@ const RegisterPet = () => {
     age: '',
     weight: '',
     color: '',
-    description: ''
+    description: '',
+    owner: '',
+    ownerEmail: ''
   });
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, message: '', type: '' });
+  const [users, setUsers] = useState([]);
 
   const speciesOptions = [
     { value: '', label: 'Select species' },
@@ -40,6 +45,22 @@ const RegisterPet = () => {
     { value: 'other', label: 'Other' }
   ];
 
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const response = await fetch(`${API_URL}/users`);
+        if (response.ok) {
+          const usersData = await response.json();
+          setUsers(usersData);
+        }
+      } catch (error) {
+        console.error('Error loading users:', error);
+      }
+    };
+
+    loadUsers();
+  }, []);
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -47,13 +68,34 @@ const RegisterPet = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulación de registro
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const petData = {
+        ...formData,
+        status: 'active',
+        foto: '',
+        createdAt: new Date().toISOString().split('T')[0],
+        cliente_id: users.find(user => user.email === formData.ownerEmail)?.id || 1,
+        medical_history: []
+      };
+
+      const response = await fetch(`${API_URL}/pets`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(petData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error registering pet');
+      }
+
+      const createdPet = await response.json();
+      
       setAlert({
         show: true,
         message: 'Pet registered successfully!',
@@ -68,9 +110,20 @@ const RegisterPet = () => {
         age: '',
         weight: '',
         color: '',
-        description: ''
+        description: '',
+        owner: '',
+        ownerEmail: ''
       });
-    }, 1500);
+    } catch (error) {
+      console.error('Error registering pet:', error);
+      setAlert({
+        show: true,
+        message: 'Error registering pet. Please try again.',
+        type: 'danger'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -171,6 +224,33 @@ const RegisterPet = () => {
                   value={formData.color}
                   onChange={(e) => handleInputChange('color', e.target.value)}
                   placeholder="Enter color"
+                />
+              </div>
+            </CCol>
+          </CRow>
+
+          <CRow>
+            <CCol md={6}>
+              <div className="mb-3">
+                <CFormLabel htmlFor="owner">Owner Name</CFormLabel>
+                <CFormInput
+                  type="text"
+                  id="owner"
+                  value={formData.owner}
+                  onChange={(e) => handleInputChange('owner', e.target.value)}
+                  placeholder="Enter owner name"
+                />
+              </div>
+            </CCol>
+            <CCol md={6}>
+              <div className="mb-3">
+                <CFormLabel htmlFor="ownerEmail">Owner Email</CFormLabel>
+                <CFormInput
+                  type="email"
+                  id="ownerEmail"
+                  value={formData.ownerEmail}
+                  onChange={(e) => handleInputChange('ownerEmail', e.target.value)}
+                  placeholder="owner@example.com"
                 />
               </div>
             </CCol>
