@@ -131,6 +131,16 @@
       "fecha_nacimiento": "2002-02-12",
       "direccion": "la grita",
       "contrasena": "juan123"
+    },
+    {
+      "id": "952f",
+      "nombre": "maria Pérez",
+      "correo": "mariangel@gmail.com",
+      "usuario": "maria",
+      "telefono": "04247516658",
+      "fecha_nacimiento": "2002-02-12",
+      "direccion": "la grita",
+      "contrasena": "maria123."
     }
   ],
   "pets": [

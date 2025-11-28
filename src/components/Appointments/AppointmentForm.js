@@ -1,9 +1,9 @@
 // AppointmentForm.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import AlertModal from "./AlertModal";
+import AlertModal from "./../AlertModal";
 import {
   appointmentSchema,
   defaultAppointmentValues,
@@ -93,9 +93,9 @@ const AppointmentForm = ({
       setModalMsg("El veterinario ya tiene una cita en ese horario.");
       setModalOpen(true);
       return;
-    }
+    }    
 
-    const payload = {
+    const payloa = {
       ...data,
       mascota_id: Number(data.mascota_id),
       veterinario_id: Number(data.veterinario_id),
@@ -103,7 +103,6 @@ const AppointmentForm = ({
     };
 
     onSubmit(payload);
-
     setModalType("success");
     setModalMsg("Cita registrada correctamente.");
     setModalOpen(true);
@@ -153,7 +152,7 @@ const AppointmentForm = ({
   // FORMULARIO
   // ----------------------------------------------------------------------
   return (
-    <form onSubmit={handleSubmit(submitHandler)} className="appointment-form">
+    <form onSubmit={handleSubmit()} className="appointment-form">
       <div className="auth-header">
         <h1>Crear o editar cita</h1>
         <p>Completa los datos para agendar tu cita.</p>

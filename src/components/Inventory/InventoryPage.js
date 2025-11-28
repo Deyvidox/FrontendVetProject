@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CButton, CModal, CModalBody, CModalHeader, CModalTitle } from '@coreui/react';
 import axios from 'axios';
 import InventoryForm from './InventoryForm';
-import InventoryTable from './InventoryTable';
+import InventoryTable from './../InventoryTable';
 import '../../css/Inventory/inventory.css';
 
 const InventoryPage = () => {
@@ -18,7 +18,7 @@ const InventoryPage = () => {
   useEffect(() => {
     const fetchInventory = async () => {
       try {
-        const res = await axios.get('http://localhost:3001/inventory');
+        const res = await axios.get('http://localhost:3000/inventory');
         setInventory(res.data);
       } catch (err) {
         console.error('Error al cargar inventario', err);
