@@ -10,7 +10,6 @@ import {
   CTableBody,
   CTableDataCell,
   CBadge,
-  CButton,
   CInputGroup,
   CFormInput,
   CInputGroupText,
@@ -20,7 +19,7 @@ import {
 } from '@coreui/react';
 import { cilSearch, cilUser, cilPencil, cilTrash } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-import '../../css/users/UserList.css';
+import '../../css/UserList.css';
 
 const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,7 +42,7 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
-  const handleEdit = async (userId) => {
+  const handleEdi = async (userId) => {
     console.log('Edit user:', userId);
     // Aquí podrías abrir un modal de edición
     try {
@@ -146,7 +145,7 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
             </CTableHead>
             <CTableBody>
               {currentUsers.length > 0 ? (
-                currentUsers.map((user) => (
+                currenUsers.map((user) => (
                   <CTableRow key={user.id}>
                     <CTableDataCell>
                       <strong>#{user.id}</strong>
