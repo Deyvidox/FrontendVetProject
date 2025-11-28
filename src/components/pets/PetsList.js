@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CCard,
   CCardHeader,
@@ -15,46 +15,94 @@ import {
   CFormInput,
   CInputGroupText,
   CPagination,
-  CPaginationItem
+  CPaginationItem,
+  CAlert,
+  CSpinner
 } from '@coreui/react';
 import { cilSearch, cilHeart, cilPencil, cilTrash } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import '../../css/pets/PetsList.css';
 
-const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
+const API_URL = "http://localhost:3001";
+
+const PetsList = ({ onPetUpdate, onPetDelete, onPetAdd }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [pets, setPets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const petsPerPage = 5;
 
-  // Filtrar mascotas basado en la búsqueda
+  useEffect(() => {
+    const loadPets = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`${API_URL}/pets`);
+        if (!response.ok) {
+          throw new Error('Error loading pets');
+        }
+        
+        const petsData = await response.json();
+        setPets(petsData);
+      } catch (error) {
+        console.error('Error loading pets:', error);
+        setError('Failed to load pets. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPets();
+  }, []);
+
+  // Filter pets based on search
   const filteredPets = pets.filter(pet =>
     pet.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pet.breed?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pet.owner?.toLowerCase().includes(searchTerm.toLowerCase())
+    pet.owner?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pet.species?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Paginación
+  // Pagination
   const indexOfLastPet = currentPage * petsPerPage;
   const indexOfFirstPet = indexOfLastPet - petsPerPage;
   const currentPets = filteredPets.slice(indexOfFirstPet, indexOfLastPet);
   const totalPages = Math.ceil(filteredPets.length / petsPerPage);
 
   const handleEdit = (petId) => {
-    console.log('Editar mascota:', petId);
-    alert(`Editar mascota ID: ${petId}`);
+    console.log('Edit pet:', petId);
+    // Aquí podrías abrir un modal de edición
   };
 
-  const handleDelete = (petId) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta mascota?')) {
-      onPetDelete?.(petId);
+  const handleDelete = async (petId) => {
+    if (window.confirm('Are you sure you want to delete this pet?')) {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_URL}/pets/${petId}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Error deleting pet');
+        }
+
+        setPets(prevPets => prevPets.filter(pet => pet.id !== petId));
+      } catch (error) {
+        console.error('Error deleting pet:', error);
+        setError('Error deleting pet');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      active: { color: 'success', text: 'Activo' },
-      inactive: { color: 'secondary', text: 'Inactivo' },
-      pending: { color: 'warning', text: 'Pendiente' }
+      active: { color: 'success', text: 'Active' },
+      inactive: { color: 'secondary', text: 'Inactive' },
+      pending: { color: 'warning', text: 'Pending' }
     };
     
     const config = statusConfig[status] || { color: 'secondary', text: status };
@@ -63,16 +111,29 @@ const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
 
   const getSpeciesBadge = (species) => {
     const speciesConfig = {
-      dog: { color: 'primary', text: 'Perro' },
-      cat: { color: 'warning', text: 'Gato' },
-      bird: { color: 'info', text: 'Ave' },
-      rabbit: { color: 'success', text: 'Conejo' },
-      other: { color: 'secondary', text: 'Otro' }
+      dog: { color: 'primary', text: 'Dog' },
+      cat: { color: 'warning', text: 'Cat' },
+      bird: { color: 'info', text: 'Bird' },
+      rabbit: { color: 'success', text: 'Rabbit' },
+      other: { color: 'secondary', text: 'Other' }
     };
     
     const config = speciesConfig[species] || { color: 'secondary', text: species };
     return <CBadge color={config.color}>{config.text}</CBadge>;
   };
+
+  if (loading && pets.length === 0) {
+    return (
+      <CCard className="pets-card pets-list-container">
+        <CCardBody>
+          <div className="text-center py-5">
+            <CSpinner color="primary" />
+            <p className="mt-2">Loading pets...</p>
+          </div>
+        </CCardBody>
+      </CCard>
+    );
+  }
 
   return (
     <CCard className="pets-card pets-list-container">
@@ -80,12 +141,18 @@ const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
         <div className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0">
             <CIcon icon={cilHeart} className="me-2" />
-            Listado de Mascotas
+            Pets List
           </h5>
         </div>
       </CCardHeader>
       <CCardBody>
-        {/* Barra de búsqueda */}
+        {error && (
+          <CAlert color="danger" className="mb-3">
+            {error}
+          </CAlert>
+        )}
+
+        {/* Search Bar */}
         <div className="pets-search-container">
           <CInputGroup>
             <CInputGroupText className="pets-search-icon">
@@ -93,7 +160,7 @@ const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
             </CInputGroupText>
             <CFormInput
               className="pets-search-input"
-              placeholder="Buscar por nombre, raza o propietario..."
+              placeholder="Search by name, breed, owner or species..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -103,19 +170,21 @@ const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
           </CInputGroup>
         </div>
 
-        {/* Tabla de mascotas */}
+        {/* Pets Table */}
         <div className="pets-table-container">
           <CTable responsive striped hover className="pets-table">
             <CTableHead>
               <CTableRow>
                 <CTableHeaderCell>ID</CTableHeaderCell>
-                <CTableHeaderCell>Nombre</CTableHeaderCell>
-                <CTableHeaderCell>Especie</CTableHeaderCell>
-                <CTableHeaderCell>Raza</CTableHeaderCell>
-                <CTableHeaderCell>Edad</CTableHeaderCell>
-                <CTableHeaderCell>Propietario</CTableHeaderCell>
-                <CTableHeaderCell>Estado</CTableHeaderCell>
-                <CTableHeaderCell className="text-center">Acciones</CTableHeaderCell>
+                <CTableHeaderCell>Name</CTableHeaderCell>
+                <CTableHeaderCell>Species</CTableHeaderCell>
+                <CTableHeaderCell>Breed</CTableHeaderCell>
+                <CTableHeaderCell>Age</CTableHeaderCell>
+                <CTableHeaderCell>Weight</CTableHeaderCell>
+                <CTableHeaderCell>Owner</CTableHeaderCell>
+                <CTableHeaderCell>Status</CTableHeaderCell>
+                <CTableHeaderCell>Created At</CTableHeaderCell>
+                <CTableHeaderCell className="text-center">Actions</CTableHeaderCell>
               </CTableRow>
             </CTableHead>
             <CTableBody>
@@ -131,8 +200,17 @@ const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
                     <CTableDataCell>{getSpeciesBadge(pet.species)}</CTableDataCell>
                     <CTableDataCell>{pet.breed}</CTableDataCell>
                     <CTableDataCell>{pet.age}</CTableDataCell>
-                    <CTableDataCell>{pet.owner}</CTableDataCell>
+                    <CTableDataCell>{pet.weight} kg</CTableDataCell>
+                    <CTableDataCell>
+                      <div>
+                        <div>{pet.owner}</div>
+                        <small className="text-muted">{pet.ownerEmail}</small>
+                      </div>
+                    </CTableDataCell>
                     <CTableDataCell>{getStatusBadge(pet.status)}</CTableDataCell>
+                    <CTableDataCell>
+                      {new Date(pet.createdAt).toLocaleDateString('en-US')}
+                    </CTableDataCell>
                     <CTableDataCell>
                       <div className="pets-actions-container">
                         <CButton
@@ -140,6 +218,7 @@ const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
                           size="sm"
                           className="pets-action-btn pets-action-btn-edit"
                           onClick={() => handleEdit(pet.id)}
+                          disabled={loading}
                         >
                           <CIcon icon={cilPencil} />
                         </CButton>
@@ -148,6 +227,7 @@ const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
                           size="sm"
                           className="pets-action-btn pets-action-btn-delete"
                           onClick={() => handleDelete(pet.id)}
+                          disabled={loading}
                         >
                           <CIcon icon={cilTrash} />
                         </CButton>
@@ -157,14 +237,14 @@ const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
                 ))
               ) : (
                 <CTableRow>
-                  <CTableDataCell colSpan="8" className="text-center py-4">
+                  <CTableDataCell colSpan="10" className="text-center py-4">
                     <div className="pets-empty-state">
                       <CIcon icon={cilHeart} className="pets-empty-state-icon" />
-                      <h5>No se encontraron mascotas</h5>
+                      <h5>No pets found</h5>
                       <p className="text-muted">
                         {searchTerm 
-                          ? 'No hay mascotas que coincidan con tu búsqueda' 
-                          : 'No hay mascotas registradas en el sistema'
+                          ? 'No pets match your search' 
+                          : 'No pets registered in the system'
                         }
                       </p>
                     </div>
@@ -175,7 +255,7 @@ const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
           </CTable>
         </div>
 
-        {/* Paginación */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="pets-pagination">
             <CPagination align="center">
@@ -183,7 +263,7 @@ const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(currentPage - 1)}
               >
-                Anterior
+                Previous
               </CPaginationItem>
               
               {[...Array(totalPages)].map((_, index) => (
@@ -200,16 +280,16 @@ const PetsList = ({ pets = [], onPetUpdate, onPetDelete, onPetAdd }) => {
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(currentPage + 1)}
               >
-                Siguiente
+                Next
               </CPaginationItem>
             </CPagination>
           </div>
         )}
 
-        {/* Información de paginación */}
+        {/* Pagination Info */}
         <div className="pets-pagination-info text-center mt-2">
-          Mostrando {currentPets.length} de {filteredPets.length} mascotas
-          {searchTerm && ` (filtrados de ${pets.length} total)`}
+          Showing {currentPets.length} of {filteredPets.length} pets
+          {searchTerm && ` (filtered from ${pets.length} total)`}
         </div>
       </CCardBody>
     </CCard>

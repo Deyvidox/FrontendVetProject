@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CCard,
   CCardHeader,
@@ -10,47 +10,47 @@ import {
   CModalHeader,
   CModalTitle,
   CModalBody,
-  CModalFooter
+  CModalFooter,
+  CAlert,
+  CSpinner
 } from '@coreui/react';
 import { cilHeart, cilCalendar } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import '../../css/pets/MyPets.css';
 
+const API_URL = "http://localhost:3001";
+
 const MyPets = () => {
   const [selectedPet, setSelectedPet] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showMedicalHistory, setShowMedicalHistory] = useState(false);
+  const [pets, setPets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Datos de ejemplo
-  const pets = [
-    {
-      id: 1,
-      name: 'Max',
-      species: 'dog',
-      breed: 'Golden Retriever',
-      age: '3 years',
-      weight: '25 kg',
-      color: 'Golden',
-      description: 'Friendly and energetic golden retriever',
-      medicalHistory: [
-        { date: '2024-01-15', procedure: 'Vaccination', vet: 'Dr. Smith' },
-        { date: '2024-03-20', procedure: 'Checkup', vet: 'Dr. Johnson' }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Luna',
-      species: 'cat',
-      breed: 'Siamese',
-      age: '2 years',
-      weight: '4 kg',
-      color: 'White/Brown',
-      description: 'Calm and affectionate siamese cat',
-      medicalHistory: [
-        { date: '2024-02-10', procedure: 'Vaccination', vet: 'Dr. Wilson' }
-      ]
-    }
-  ];
+  useEffect(() => {
+    const loadPets = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`${API_URL}/pets`);
+        if (!response.ok) {
+          throw new Error('Error loading pets');
+        }
+        
+        const petsData = await response.json();
+        setPets(petsData);
+      } catch (error) {
+        console.error('Error loading pets:', error);
+        setError('Failed to load pets. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPets();
+  }, []);
 
   const handlePetClick = (pet) => {
     setSelectedPet(pet);
@@ -65,10 +65,10 @@ const MyPets = () => {
     return cilHeart;
   };
 
-  // Placeholder simple sin imágenes externas
+  // Simple placeholder without external images
   const PetPlaceholder = ({ species, name }) => {
-    const color = species === 'dog' ? '#4f46e5' : '#ec4899';
-    const emoji = species === 'dog' ? '🐶' : '🐱';
+    const color = species === 'dog' ? '#4f46e5' : species === 'cat' ? '#ec4899' : '#10b981';
+    const emoji = species === 'dog' ? '🐶' : species === 'cat' ? '🐱' : '🐦';
     
     return (
       <div 
@@ -91,6 +91,31 @@ const MyPets = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <CCard className="my-pets-card">
+        <CCardBody>
+          <div className="text-center py-5">
+            <CSpinner color="primary" />
+            <p className="mt-2">Loading pets...</p>
+          </div>
+        </CCardBody>
+      </CCard>
+    );
+  }
+
+  if (error) {
+    return (
+      <CCard className="my-pets-card">
+        <CCardBody>
+          <CAlert color="danger">
+            {error}
+          </CAlert>
+        </CCardBody>
+      </CCard>
+    );
+  }
+
   return (
     <>
       <CCard className="my-pets-card">
@@ -108,6 +133,7 @@ const MyPets = () => {
                   <CCard 
                     className="pet-card h-100" 
                     onClick={() => handlePetClick(pet)}
+                    style={{ cursor: 'pointer' }}
                   >
                     <PetPlaceholder species={pet.species} name={pet.name} />
                     <CCardBody className="pet-card-body">
@@ -123,8 +149,13 @@ const MyPets = () => {
                           {pet.age}
                         </small>
                         <small className="text-muted ms-2">
-                          ⚖️ {pet.weight}
+                          ⚖️ {pet.weight} kg
                         </small>
+                      </div>
+                      <div className="pet-status">
+                        <span className={`badge ${pet.status === 'active' ? 'bg-success' : 'bg-secondary'}`}>
+                          {pet.status}
+                        </span>
                       </div>
                     </CCardBody>
                   </CCard>
@@ -141,7 +172,7 @@ const MyPets = () => {
         </CCardBody>
       </CCard>
 
-      {/* Modal de detalles de mascota */}
+      {/* Pet Details Modal */}
       <CModal 
         visible={showModal} 
         onClose={() => setShowModal(false)}
@@ -173,10 +204,22 @@ const MyPets = () => {
                     <strong>Age:</strong> {selectedPet.age}
                   </div>
                   <div className="detail-item">
-                    <strong>Weight:</strong> {selectedPet.weight}
+                    <strong>Weight:</strong> {selectedPet.weight} kg
                   </div>
                   <div className="detail-item">
                     <strong>Color:</strong> {selectedPet.color}
+                  </div>
+                  <div className="detail-item">
+                    <strong>Owner:</strong> {selectedPet.owner}
+                  </div>
+                  <div className="detail-item">
+                    <strong>Email:</strong> {selectedPet.ownerEmail}
+                  </div>
+                  <div className="detail-item">
+                    <strong>Status:</strong> 
+                    <span className={`badge ${selectedPet.status === 'active' ? 'bg-success' : 'bg-secondary'} ms-2`}>
+                      {selectedPet.status}
+                    </span>
                   </div>
                   <div className="detail-item">
                     <strong>Description:</strong> 
@@ -191,8 +234,9 @@ const MyPets = () => {
           <CButton 
             color="primary" 
             onClick={handleViewMedicalHistory}
+            disabled={!selectedPet?.medical_history?.length}
           >
-            View Medical History
+            View Medical History ({selectedPet?.medical_history?.length || 0})
           </CButton>
           <CButton color="secondary" onClick={() => setShowModal(false)}>
             Close
@@ -200,7 +244,7 @@ const MyPets = () => {
         </CModalFooter>
       </CModal>
 
-      {/* Modal de historial médico */}
+      {/* Medical History Modal */}
       <CModal 
         visible={showMedicalHistory} 
         onClose={() => setShowMedicalHistory(false)}
@@ -212,15 +256,20 @@ const MyPets = () => {
           </CModalTitle>
         </CModalHeader>
         <CModalBody>
-          {selectedPet?.medicalHistory?.length > 0 ? (
+          {selectedPet?.medical_history?.length > 0 ? (
             <div className="medical-history">
-              {selectedPet.medicalHistory.map((record, index) => (
+              {selectedPet.medical_history.map((record, index) => (
                 <div key={index} className="medical-record p-3 mb-2 border rounded">
                   <div className="d-flex justify-content-between">
                     <strong>{record.procedure}</strong>
-                    <span className="text-muted">{record.date}</span>
+                    <span className="text-muted">{new Date(record.date).toLocaleDateString('en-US')}</span>
                   </div>
-                  <div className="text-muted">Veterinarian: {record.vet}</div>
+                  <div className="text-muted">Veterinarian: {record.veterinarian}</div>
+                  {record.notes && (
+                    <div className="mt-2">
+                      <small>Notes: {record.notes}</small>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
