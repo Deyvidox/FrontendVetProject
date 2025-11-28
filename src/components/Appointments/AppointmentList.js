@@ -1,11 +1,9 @@
-// AppointmentList.jsx
 import React, { useMemo, useState } from 'react';
 import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CButton, CFormSelect, CFormInput } from '@coreui/react';
 import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
-import '../../css/Inventory/inventory.css'; // usa tus estilos de inventario
+import '../../css/Inventory/inventory.css';
 
-// Clase CSS según estado
 const stateClass = (estado) => `tag tag-${estado.toLowerCase()}`;
 
 const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => {
@@ -35,42 +33,27 @@ const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => 
     [normalized, filtroEstado, search, busquedaActiva]
   );
 
-  const deleteAppointment = (id) => {
-    if (!window.confirm('¿Eliminar esta cita?')) return;
-    if (onDelete) onDelete(id);
-  };
-
-  const updateStatus = (id, newStatus) => {
-    if (onUpdateStatus) onUpdateStatus(id, newStatus);
-  };
+  const deleteAppointment = (id) => { if(onDelete) onDelete(id); };
+  const updateStatus = (id, newStatus) => { if(onUpdateStatus) onUpdateStatus(id, newStatus); };
 
   const exportPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(14);
     doc.text('Reporte de Citas', 14, 18);
     let y = 28;
-
     filteredAppointments.forEach((i, idx) => {
       doc.setFontSize(11);
-      doc.text(
-        `${idx + 1}. Cliente: ${i.cliente?.nombre || '-'} | Mascota: ${i.mascota?.nombre || '-'} | Vet: ${i.vet?.nombre || '-'}`,
-        14,
-        y
-      );
+      doc.text(`${idx + 1}. Cliente: ${i.cliente?.nombre || '-'} | Mascota: ${i.mascota?.nombre || '-'} | Vet: ${i.vet?.nombre || '-'}`, 14, y);
       y += 6;
       doc.text(`Fecha: ${i.fechaLabel} | Estado: ${i.estado}`, 14, y);
       y += 10;
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
+      if(y > 270){ doc.addPage(); y = 20; }
     });
-
     doc.save('citas.pdf');
   };
 
   const exportXLS = () => {
-    const data = filteredAppointments.map((i) => ({
+    const data = filteredAppointments.map(i => ({
       Cliente: i.cliente?.nombre || '-',
       Mascota: i.mascota?.nombre || '-',
       Veterinario: i.vet?.nombre || '-',
@@ -78,7 +61,6 @@ const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => 
       Estado: i.estado,
       Notas: i.notas || '',
     }));
-
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Citas');
     XLSX.writeFile(wb, 'citas.xlsx');
@@ -90,23 +72,15 @@ const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => 
       <p className="list-summary">Se muestran {filteredAppointments.length} citas.</p>
 
       <div className="d-flex gap-2 mb-3">
-        <CFormInput
-          placeholder="Buscar por cliente, mascota o veterinario"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button onClick={() => setBusquedaActiva(!busquedaActiva)}>
-          {busquedaActiva ? 'Desactivar búsqueda' : 'Buscar'}
-        </button>
-
-        <CFormSelect value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
+        <CFormInput placeholder="Buscar por cliente, mascota o veterinario" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <button onClick={() => setBusquedaActiva(!busquedaActiva)}>{busquedaActiva ? 'Desactivar búsqueda' : 'Buscar'}</button>
+        <CFormSelect value={filtroEstado} onChange={(e)=>setFiltroEstado(e.target.value)}>
           <option value="Todos">Todos</option>
           <option value="Pendiente">Pendiente</option>
           <option value="Confirmada">Confirmada</option>
           <option value="Cancelada">Cancelada</option>
           <option value="Completada">Completada</option>
         </CFormSelect>
-
         <button onClick={exportPDF}>PDF</button>
         <button onClick={exportXLS}>Excel</button>
       </div>
@@ -124,7 +98,7 @@ const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => 
           </CTableRow>
         </CTableHead>
         <CTableBody>
-          {filteredAppointments.map((appt) => (
+          {filteredAppointments.map(appt => (
             <CTableRow key={appt.id}>
               <CTableDataCell>{appt.cliente?.nombre || '-'}</CTableDataCell>
               <CTableDataCell>{appt.mascota?.nombre || '-'}</CTableDataCell>
@@ -133,12 +107,7 @@ const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => 
               <CTableDataCell className={stateClass(appt.estado)}>{appt.estado}</CTableDataCell>
               <CTableDataCell>{appt.notas || '-'}</CTableDataCell>
               <CTableDataCell>
-                <CFormSelect
-                  size="sm"
-                  value={appt.estado}
-                  onChange={(e) => updateStatus(appt.id, e.target.value)}
-                  className="mb-1"
-                >
+                <CFormSelect size="sm" value={appt.estado} onChange={(e) => updateStatus(appt.id, e.target.value)} className="mb-1">
                   <option value="Pendiente">Pendiente</option>
                   <option value="Confirmada">Confirmada</option>
                   <option value="Cancelada">Cancelada</option>

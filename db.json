@@ -1,0 +1,83 @@
+{
+  "inventory": [
+    {
+      "id": "dfe1",
+      "nombre": "alimento",
+      "tipo": "Alimento",
+      "instrucciones": "consumir antes de 2024",
+      "cantidad": 1,
+      "precio_unitario": 12,
+      "estado": "Disponible",
+      "tags": [],
+      "imagen_url": ""
+    }
+  ],
+  "appointments": [
+    {
+      "id": "e3a2",
+      "mascota_id": 1,
+      "veterinario_id": 101,
+      "fecha_cita": "2025-11-28T22:11:00.000Z",
+      "estado": "Cancelada",
+      "notas": "cancelo la cita",
+      "evidencia_url": ""
+    }
+  ],
+  "mascotas": [
+    {
+      "id": "1",
+      "cliente_id": 1,
+      "nombre": "Firulais",
+      "foto": ""
+    },
+    {
+      "id": "2",
+      "cliente_id": 1,
+      "nombre": "Luna",
+      "foto": ""
+    },
+    {
+      "id": "3",
+      "cliente_id": 2,
+      "nombre": "Tommy",
+      "foto": ""
+    }
+  ],
+  "veterinarios": [
+    {
+      "id": "101",
+      "nombre": "Dr. Gómez",
+      "especialidad": "General"
+    },
+    {
+      "id": "102",
+      "nombre": "Dra. Pérez",
+      "especialidad": "Dermatología"
+    }
+  ],
+  "clientes": [
+    {
+      "id": "1",
+      "nombre": "Carlos Peña"
+    },
+    {
+      "id": "2",
+      "nombre": "Marta Ruiz"
+    },
+    {
+      "id": "3",
+      "nombre": "Ricardo Torres"
+    },
+    {
+      "id": "cd87",
+      "nombre": "juan Pérez",
+      "correo": "mariangel@gmail.com",
+      "usuario": "juan",
+      "telefono": "04247516658",
+      "fecha_nacimiento": "2002-02-12",
+      "direccion": "la grita",
+      "contrasena": "juan123,"
+    }
+  ],
+  "usuarios": []
+}

@@ -1,4 +1,3 @@
-// IMPORTS
 import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -16,6 +15,8 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser, cilCalendar, cilEnvelopeClosed, cilPhone } from '@coreui/icons'
 import '../../css/register/Register.css'
+
+const API = "http://localhost:3001"
 
 const Register = () => {
   const navigate = useNavigate()
@@ -36,7 +37,7 @@ const Register = () => {
   // Estado de errores
   const [errors, setErrors] = useState({})
 
-  // Estado del botón ver/ocultar contraseña
+  // Ver contraseña
   const [showPassword, setShowPassword] = useState(false)
 
   // Expresiones regulares
@@ -48,7 +49,7 @@ const Register = () => {
     passwordFuerte: /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
   }), [])
 
-  // Validación por campo
+  // Validación individual
   const validarCampo = (name, value) => {
     switch (name) {
       case 'nombres':
@@ -86,7 +87,7 @@ const Register = () => {
 
       case 'usuario':
         if (!value) return 'El usuario es obligatorio.'
-        if (!regex.usuario.test(value)) return '4–50 caracteres. Solo letras, números y ".", "_", "-".'
+        if (!regex.usuario.test(value)) return '4–50 caracteres. Letras, números ".", "_", "-".'
         return ''
 
       case 'correo':
@@ -96,7 +97,7 @@ const Register = () => {
 
       case 'contrasena':
         if (!value) return 'La contraseña es obligatoria.'
-        if (!regex.passwordFuerte.test(value)) return 'Debe tener mínimo 8 caracteres e incluir letras y números.'
+        if (!regex.passwordFuerte.test(value)) return 'Mínimo 8 caracteres, letras y números.'
         return ''
 
       case 'repetirContrasena':
@@ -109,14 +110,14 @@ const Register = () => {
     }
   }
 
-  // Manejo de cambios
+  // Manejo de inputs
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
     setErrors(prev => ({ ...prev, [name]: validarCampo(name, value) }))
   }
 
-  // Validación completa
+  // Validación general
   const validarFormularioCompleto = () => {
     const nuevosErrores = {}
     Object.keys(formData).forEach(campo => {
@@ -126,14 +127,38 @@ const Register = () => {
     return Object.values(nuevosErrores).every(msg => msg === '')
   }
 
-  // Submit (solo frontend)
-  const handleRegister = (e) => {
+  // ENVÍO REAL DE DATOS AL BACKEND
+  const handleRegister = async (e) => {
     e.preventDefault()
 
     if (!validarFormularioCompleto()) return
 
-    alert('Formulario válido.')
-    navigate('/login')
+    // Estructura compatible con login
+    const payload = {
+      nombre: `${formData.nombres} ${formData.apellidos}`,
+      correo: formData.correo,
+      usuario: formData.usuario,
+      telefono: formData.telefono,
+      fecha_nacimiento: formData.fecha_nacimiento,
+      direccion: formData.direccion,
+      contrasena: formData.contrasena
+    }
+
+    try {
+      await fetch(`${API}/clientes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+
+      alert("Registro exitoso. Ahora puedes iniciar sesión.")
+
+      // Redirigir al login y pasar datos opcionales para autocompletar
+      navigate('/login', { state: { usuario: formData.usuario, correo: formData.correo } })
+
+    } catch (error) {
+      alert("Error al registrarse.")
+    }
   }
 
   const renderError = campo =>
@@ -158,49 +183,56 @@ const Register = () => {
                   {/* Nombres */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
-                    <CFormInput name="nombres" placeholder="Nombres" value={formData.nombres} onChange={handleChange} />
+                    <CFormInput name="nombres" placeholder="Nombres"
+                      value={formData.nombres} onChange={handleChange} />
                   </CInputGroup>
                   {renderError('nombres')}
 
                   {/* Apellidos */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
-                    <CFormInput name="apellidos" placeholder="Apellidos" value={formData.apellidos} onChange={handleChange} />
+                    <CFormInput name="apellidos" placeholder="Apellidos"
+                      value={formData.apellidos} onChange={handleChange} />
                   </CInputGroup>
                   {renderError('apellidos')}
 
                   {/* Fecha nacimiento */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilCalendar} /></CInputGroupText>
-                    <CFormInput type="date" name="fecha_nacimiento" value={formData.fecha_nacimiento} onChange={handleChange} />
+                    <CFormInput type="date" name="fecha_nacimiento"
+                      value={formData.fecha_nacimiento} onChange={handleChange} />
                   </CInputGroup>
                   {renderError('fecha_nacimiento')}
 
                   {/* Teléfono */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilPhone} /></CInputGroupText>
-                    <CFormInput name="telefono" placeholder="Teléfono" value={formData.telefono} onChange={handleChange} />
+                    <CFormInput name="telefono" placeholder="Teléfono"
+                      value={formData.telefono} onChange={handleChange} />
                   </CInputGroup>
                   {renderError('telefono')}
 
                   {/* Dirección */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilEnvelopeClosed} /></CInputGroupText>
-                    <CFormInput name="direccion" placeholder="Dirección" value={formData.direccion} onChange={handleChange} />
+                    <CFormInput name="direccion" placeholder="Dirección"
+                      value={formData.direccion} onChange={handleChange} />
                   </CInputGroup>
                   {renderError('direccion')}
 
                   {/* Usuario */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
-                    <CFormInput name="usuario" placeholder="Usuario" value={formData.usuario} onChange={handleChange} />
+                    <CFormInput name="usuario" placeholder="Usuario"
+                      value={formData.usuario} onChange={handleChange} />
                   </CInputGroup>
                   {renderError('usuario')}
 
                   {/* Correo */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilEnvelopeClosed} /></CInputGroupText>
-                    <CFormInput name="correo" placeholder="Correo" value={formData.correo} onChange={handleChange} />
+                    <CFormInput name="correo" placeholder="Correo"
+                      value={formData.correo} onChange={handleChange} />
                   </CInputGroup>
                   {renderError('correo')}
 
@@ -214,7 +246,8 @@ const Register = () => {
                       value={formData.contrasena}
                       onChange={handleChange}
                     />
-                    <button type="button" className="btn-ver-password" onClick={() => setShowPassword(!showPassword)}>
+                    <button type="button" className="btn-ver-password"
+                      onClick={() => setShowPassword(!showPassword)}>
                       {showPassword ? '👁️‍🗨️' : '👁️'}
                     </button>
                   </CInputGroup>
@@ -230,7 +263,8 @@ const Register = () => {
                       value={formData.repetirContrasena}
                       onChange={handleChange}
                     />
-                    <button type="button" className="btn-ver-password" onClick={() => setShowPassword(!showPassword)}>
+                    <button type="button" className="btn-ver-password"
+                      onClick={() => setShowPassword(!showPassword)}>
                       {showPassword ? '👁️‍🗨️' : '👁️'}
                     </button>
                   </CInputGroup>
