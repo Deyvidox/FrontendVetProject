@@ -1,5 +1,15 @@
 import React, { useMemo, useState } from 'react';
-import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CButton, CFormSelect, CFormInput } from '@coreui/react';
+import { 
+  CTable, 
+  CTableHead, 
+  CTableRow, 
+  CTableHeaderCell, 
+  CTableBody, 
+  CTableDataCell, 
+  CButton, 
+  CFormSelect, 
+  CFormInput 
+} from '@coreui/react';
 import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
 import '../../css/Inventory/inventory.css';
@@ -16,6 +26,9 @@ const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => 
       (appointments || []).map((a) => ({
         ...a,
         fechaLabel: a.fecha_cita ? new Date(a.fecha_cita).toLocaleString() : '-',
+        mascotaNombre: a.mascota?.nombre || '-',
+        veterinarioNombre: a.veterinario?.nombre || '-',
+        clienteNombre: a.cliente?.nombre || '-',
       })),
     [appointments]
   );
@@ -26,15 +39,20 @@ const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => 
         (filtroEstado === 'Todos' || a.estado === filtroEstado) &&
         (!busquedaActiva ||
           !search.trim() ||
-          (a.cliente?.nombre || '').toLowerCase().includes(search.toLowerCase()) ||
-          (a.mascota?.nombre || '').toLowerCase().includes(search.toLowerCase()) ||
-          (a.vet?.nombre || '').toLowerCase().includes(search.toLowerCase()))
+          a.clienteNombre.toLowerCase().includes(search.toLowerCase()) ||
+          a.mascotaNombre.toLowerCase().includes(search.toLowerCase()) ||
+          a.veterinarioNombre.toLowerCase().includes(search.toLowerCase()))
       ),
     [normalized, filtroEstado, search, busquedaActiva]
   );
 
-  const deleteAppointment = (id) => { if(onDelete) onDelete(id); };
-  const updateStatus = (id, newStatus) => { if(onUpdateStatus) onUpdateStatus(id, newStatus); };
+  const deleteAppointment = async (id) => { 
+    if(onDelete) await onDelete(id); 
+  };
+
+  const updateStatus = async (id, newStatus) => { 
+    if(onUpdateStatus) await onUpdateStatus(id, newStatus); 
+  };
 
   const exportPDF = () => {
     const doc = new jsPDF();
@@ -43,7 +61,7 @@ const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => 
     let y = 28;
     filteredAppointments.forEach((i, idx) => {
       doc.setFontSize(11);
-      doc.text(`${idx + 1}. Cliente: ${i.cliente?.nombre || '-'} | Mascota: ${i.mascota?.nombre || '-'} | Vet: ${i.vet?.nombre || '-'}`, 14, y);
+      doc.text(`${idx + 1}. Cliente: ${i.clienteNombre} | Mascota: ${i.mascotaNombre} | Veterinario: ${i.veterinarioNombre}`, 14, y);
       y += 6;
       doc.text(`Fecha: ${i.fechaLabel} | Estado: ${i.estado}`, 14, y);
       y += 10;
@@ -54,9 +72,9 @@ const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => 
 
   const exportXLS = () => {
     const data = filteredAppointments.map(i => ({
-      Cliente: i.cliente?.nombre || '-',
-      Mascota: i.mascota?.nombre || '-',
-      Veterinario: i.vet?.nombre || '-',
+      Cliente: i.clienteNombre,
+      Mascota: i.mascotaNombre,
+      Veterinario: i.veterinarioNombre,
       Fecha: i.fechaLabel,
       Estado: i.estado,
       Notas: i.notas || '',
@@ -72,8 +90,14 @@ const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => 
       <p className="list-summary">Se muestran {filteredAppointments.length} citas.</p>
 
       <div className="d-flex gap-2 mb-3">
-        <CFormInput placeholder="Buscar por cliente, mascota o veterinario" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <button onClick={() => setBusquedaActiva(!busquedaActiva)}>{busquedaActiva ? 'Desactivar búsqueda' : 'Buscar'}</button>
+        <CFormInput 
+          placeholder="Buscar por cliente, mascota o veterinario" 
+          value={search} 
+          onChange={(e) => setSearch(e.target.value)} 
+        />
+        <button onClick={() => setBusquedaActiva(!busquedaActiva)}>
+          {busquedaActiva ? 'Desactivar búsqueda' : 'Buscar'}
+        </button>
         <CFormSelect value={filtroEstado} onChange={(e)=>setFiltroEstado(e.target.value)}>
           <option value="Todos">Todos</option>
           <option value="Pendiente">Pendiente</option>
@@ -100,21 +124,32 @@ const AppointmentList = ({ appointments, onEdit, onDelete, onUpdateStatus }) => 
         <CTableBody>
           {filteredAppointments.map(appt => (
             <CTableRow key={appt.id}>
-              <CTableDataCell>{appt.cliente?.nombre || '-'}</CTableDataCell>
-              <CTableDataCell>{appt.mascota?.nombre || '-'}</CTableDataCell>
-              <CTableDataCell>{appt.vet?.nombre || '-'}</CTableDataCell>
+              <CTableDataCell>{appt.clienteNombre}</CTableDataCell>
+              <CTableDataCell>{appt.mascotaNombre}</CTableDataCell>
+              <CTableDataCell>{appt.veterinarioNombre}</CTableDataCell>
               <CTableDataCell>{appt.fechaLabel}</CTableDataCell>
-              <CTableDataCell className={stateClass(appt.estado)}>{appt.estado}</CTableDataCell>
+              <CTableDataCell className={stateClass(appt.estado)}>
+                {appt.estado}
+              </CTableDataCell>
               <CTableDataCell>{appt.notas || '-'}</CTableDataCell>
               <CTableDataCell>
-                <CFormSelect size="sm" value={appt.estado} onChange={(e) => updateStatus(appt.id, e.target.value)} className="mb-1">
+                <CFormSelect 
+                  size="sm" 
+                  value={appt.estado} 
+                  onChange={(e) => updateStatus(appt.id, e.target.value)}
+                  className="mb-1"
+                >
                   <option value="Pendiente">Pendiente</option>
                   <option value="Confirmada">Confirmada</option>
                   <option value="Cancelada">Cancelada</option>
                   <option value="Completada">Completada</option>
                 </CFormSelect>
-                <CButton color="warning" size="sm" onClick={() => onEdit && onEdit(appt)}>Editar</CButton>
-                <CButton color="danger" size="sm" className="ms-1" onClick={() => deleteAppointment(appt.id)}>Eliminar</CButton>
+                <CButton color="warning" size="sm" onClick={() => onEdit && onEdit(appt)}>
+                  Editar
+                </CButton>
+                <CButton color="danger" size="sm" className="ms-1" onClick={() => deleteAppointment(appt.id)}>
+                  Eliminar
+                </CButton>
               </CTableDataCell>
             </CTableRow>
           ))}

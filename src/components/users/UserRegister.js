@@ -17,8 +17,6 @@ import { cilUser, cilSave, cilReload } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import '../../css/users/UserRegister.css'
 
-const API_URL = "http://localhost:3001";
-
 const UserRegister = () => {
   const [loading, setLoading] = useState(false)
   const [alert, setAlert] = useState({ show: false, message: '', type: '' })
@@ -43,43 +41,35 @@ const UserRegister = () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/users`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        throw new Error('Error registering user')
-      }
-
-      const createdUser = await response.json()
+      // Aquí irá la conexión a tu backend
+      // Ejemplo: await fetch('tu-backend-url/api/users', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(formData)
+      // });
       
       setAlert({
         show: true,
         message: 'User registered successfully!',
         type: 'success'
-      })
+      });
       
-      // Reset form
-      e.target.reset()
+      e.target.reset();
       
     } catch (error) {
-      console.error('Error registering user:', error)
+      console.error('Error registering user:', error);
       setAlert({
         show: true,
         message: 'Error registering user. Please try again.',
         type: 'danger'
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   const handleReset = () => {
-    setAlert({ show: false, message: '', type: '' })
+    setAlert({ show: false, message: '', type: '' });
   }
 
   return (
@@ -99,7 +89,6 @@ const UserRegister = () => {
           )}
           
           <CForm onSubmit={handleSubmit} onReset={handleReset}>
-            {/* Personal Information Section */}
             <div className="form-section">
               <h6 className="section-title">
                 <CIcon icon={cilUser} className="icon" />
@@ -171,7 +160,6 @@ const UserRegister = () => {
               </CRow>
             </div>
 
-            {/* Professional Information Section */}
             <div className="form-section">
               <h6 className="section-title">
                 <CIcon icon={cilUser} className="icon" />
@@ -245,7 +233,6 @@ const UserRegister = () => {
               </CRow>
             </div>
 
-            {/* Security Section */}
             <div className="form-section">
               <h6 className="section-title">
                 <CIcon icon={cilUser} className="icon" />

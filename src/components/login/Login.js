@@ -14,56 +14,40 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
-
-// Importo los estilos personalizados del login
 import '../../css/login/Login.css'
-
-const API = "http://localhost:3001";
 
 const Login = () => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  // Si el usuario viene del registro, recupero sus datos
   const dataFromRegister = location.state || {}
 
-  // Estado del usuario (username o correo)
   const [usuario, setUsuario] = useState(
     dataFromRegister.usuario || dataFromRegister.correo || ''
   )
 
-  // Estado de contraseña
   const [password, setPassword] = useState('')
-
-  // Estado para mostrar / ocultar la contraseña
   const [showPassword, setShowPassword] = useState(false)
-
-  // Estado de error
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  // ===========================
-  // 🔐 Manejar proceso de Login
-  // ===========================
   const handleLogin = async (e) => {
     e.preventDefault()
     setError("")
+    setLoading(true)
 
     try {
-      // CONSULTA CORRECTA: ahora usamos /clientes
-      const res = await fetch(`${API}/clientes`)
-      const usuarios = await res.json()
-
-      // Buscar si existe un usuario con username o email
-      const usuarioEncontrado = usuarios.find(
-        (u) =>
-          (u.usuario === usuario || u.correo === usuario) &&
-          u.contrasena === password
-      )
-
-      if (usuarioEncontrado) {
-        alert(`Bienvenido, ${usuarioEncontrado.usuario} ✅`)
-
-        // Guardar un mínimo de datos del usuario logueado
+      // Aquí irá la conexión a tu backend
+      // Ejemplo: const res = await fetch('tu-backend-url/api/auth/login', {
+      //   method: 'POST',
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ usuario, password })
+      // });
+      
+      // Simulación de login exitoso
+      const usuarioEncontrado = { id: 1, usuario, correo: usuario }
+      
+      if (usuario && password) {
         localStorage.setItem(
           "usuarioLogueado",
           JSON.stringify({
@@ -80,6 +64,8 @@ const Login = () => {
 
     } catch (err) {
       setError("Error al conectar con el servidor.")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -90,17 +76,14 @@ const Login = () => {
           <CCol md={8}>
             <CCard className="auth-card">
 
-              {/* Panel izquierdo con el formulario */}
               <CCardBody className="auth-card-inner">
                 <CForm className="auth-form" onSubmit={handleLogin}>
 
-                  {/* Encabezado */}
                   <div className="auth-header">
                     <h1>Acceso</h1>
                     <p>Inicia sesión en tu cuenta</p>
                   </div>
 
-                  {/* Usuario / Correo */}
                   <CInputGroup className="mb-3">
                     <CInputGroupText>
                       <CIcon icon={cilUser} />
@@ -110,10 +93,10 @@ const Login = () => {
                       autoComplete="username"
                       value={usuario}
                       onChange={(e) => setUsuario(e.target.value)}
+                      disabled={loading}
                     />
                   </CInputGroup>
 
-                  {/* Contraseña */}
                   <CInputGroup className="mb-4 password-wrapper">
                     <CInputGroupText>
                       <CIcon icon={cilLockLocked} />
@@ -125,9 +108,9 @@ const Login = () => {
                       autoComplete="current-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      disabled={loading}
                     />
 
-                    {/* Botón mostrar contraseña */}
                     <button
                       type="button"
                       className="btn-ver-password"
@@ -137,14 +120,12 @@ const Login = () => {
                     </button>
                   </CInputGroup>
 
-                  {/* Mensaje de error */}
                   {error && <p className="text-danger">{error}</p>}
 
-                  {/* Botones */}
                   <CRow>
                     <CCol xs={6}>
-                      <CButton color="primary" type="submit">
-                        Login
+                      <CButton color="primary" type="submit" disabled={loading}>
+                        {loading ? "Iniciando..." : "Login"}
                       </CButton>
                     </CCol>
 
@@ -152,6 +133,7 @@ const Login = () => {
                       <CButton
                         color="link"
                         onClick={() => navigate('/recover/password')}
+                        disabled={loading}
                       >
                         Forgot password?
                       </CButton>
@@ -160,7 +142,6 @@ const Login = () => {
                 </CForm>
               </CCardBody>
 
-              {/* Panel derecho */}
               <CCard className="auth-card-right">
                 <CCardBody>
                   <h2>Registro</h2>
