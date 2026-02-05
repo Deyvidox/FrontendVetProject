@@ -10,12 +10,12 @@ import {
   CTableBody,
   CTableDataCell,
   CBadge,
-  CButton,
   CInputGroup,
   CFormInput,
   CInputGroupText,
   CPagination,
   CPaginationItem,
+  CButton,
   CAlert
 } from '@coreui/react';
 import { cilSearch, cilUser, cilPencil, cilTrash } from '@coreui/icons';
@@ -29,7 +29,6 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
   const [error, setError] = useState(null);
   const usersPerPage = 5;
 
-  // Filter users based on search
   const filteredUsers = users.filter(user =>
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -37,15 +36,12 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
     user.department?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Pagination
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
   const handleEdit = async (userId) => {
-    console.log('Edit user:', userId);
-    // Aquí podrías abrir un modal de edición
     try {
       setLoading(true);
       // Lógica para editar usuario
@@ -109,7 +105,6 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
           </CAlert>
         )}
 
-        {/* Search Bar */}
         <div className="user-search-container">
           <CInputGroup>
             <CInputGroupText className="user-search-icon">
@@ -127,7 +122,6 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
           </CInputGroup>
         </div>
 
-        {/* Users Table */}
         <div className="user-table-container">
           <CTable responsive striped hover className="user-table">
             <CTableHead>
@@ -161,9 +155,9 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
                     <CTableDataCell>{user.position}</CTableDataCell>
                     <CTableDataCell>{getStatusBadge(user.status)}</CTableDataCell>
                     <CTableDataCell>
-                      {new Date(user.createdAt).toLocaleDateString('en-US')}
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US') : '-'}
                     </CTableDataCell>
-                    <CTableDataCell>
+                    <CTableDataCell>                      
                       <div className="user-actions-container">
                         <CButton
                           color="primary"
@@ -207,7 +201,6 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
           </CTable>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="user-pagination">
             <CPagination align="center">
@@ -238,7 +231,6 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd }) => {
           </div>
         )}
 
-        {/* Pagination Info */}
         <div className="user-pagination-info text-center mt-2">
           Showing {currentUsers.length} of {filteredUsers.length} users
           {searchTerm && ` (filtered from ${users.length} total)`}

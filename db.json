@@ -89,6 +89,36 @@
       "status": "active",
       "avatar": "",
       "createdAt": "2025-11-28"
+    },
+    {
+      "id": "239a",
+      "name": "Diego",
+      "email": "diego@gmail.com",
+      "phone": "+58 424 723 0000",
+      "role": "Client",
+      "department": "...",
+      "position": "....",
+      "bio": "...",
+      "username": "xdiegox",
+      "password": "123",
+      "status": "active",
+      "avatar": "",
+      "createdAt": "2025-11-28"
+    },
+    {
+      "id": "29dc",
+      "name": "Renato",
+      "email": "renato@gmail.com",
+      "phone": "+58 424 523 0000",
+      "role": "Client",
+      "department": "...",
+      "position": "...",
+      "bio": "...",
+      "username": "ElRenato",
+      "password": "123",
+      "status": "active",
+      "avatar": "",
+      "createdAt": "2025-11-28"
     }
   ],
   "clientes": [
@@ -303,6 +333,40 @@
       "createdAt": "2024-01-27",
       "cliente_id": 2,
       "foto": ""
+    },
+    {
+      "id": "e6c5",
+      "name": "aaaaa",
+      "species": "dog",
+      "breed": "Pastor Aleman",
+      "age": "2 years",
+      "weight": "5.2",
+      "color": "Negro",
+      "description": "...",
+      "owner": "diego",
+      "ownerEmail": "diego@gmail.com",
+      "status": "active",
+      "foto": "",
+      "createdAt": "2025-11-28",
+      "cliente_id": "239a",
+      "medical_history": []
+    },
+    {
+      "id": "ee0d",
+      "name": "maya",
+      "species": "dog",
+      "breed": "Munsterlander",
+      "age": "5 years",
+      "weight": "20",
+      "color": "blanco",
+      "description": "inquieto",
+      "owner": "renato",
+      "ownerEmail": "renato@gmail.com",
+      "status": "active",
+      "foto": "",
+      "createdAt": "2025-11-28",
+      "cliente_id": "29dc",
+      "medical_history": []
     }
   ],
   "veterinarios": [

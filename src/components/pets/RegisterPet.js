@@ -18,8 +18,6 @@ import { cilPlus, cilCheckCircle } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import '../../css/pets/RegisterPet.css';
 
-const API_URL = "http://localhost:3001";
-
 const RegisterPet = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -48,11 +46,13 @@ const RegisterPet = () => {
   useEffect(() => {
     const loadUsers = async () => {
       try {
-        const response = await fetch(`${API_URL}/users`);
-        if (response.ok) {
-          const usersData = await response.json();
-          setUsers(usersData);
-        }
+        // Aquí irá la conexión a tu backend
+        // Ejemplo: const response = await fetch('tu-backend-url/api/users');
+        // const usersData = await response.json();
+        // setUsers(usersData);
+        
+        setUsers([]);
+        
       } catch (error) {
         console.error('Error loading users:', error);
       }
@@ -82,19 +82,12 @@ const RegisterPet = () => {
         medical_history: []
       };
 
-      const response = await fetch(`${API_URL}/pets`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(petData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error registering pet');
-      }
-
-      const createdPet = await response.json();
+      // Aquí irá la conexión a tu backend
+      // Ejemplo: await fetch('tu-backend-url/api/pets', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(petData)
+      // });
       
       setAlert({
         show: true,
@@ -102,7 +95,6 @@ const RegisterPet = () => {
         type: 'success'
       });
       
-      // Reset form
       setFormData({
         name: '',
         species: '',

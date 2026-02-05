@@ -18,12 +18,11 @@ const PetsModule = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Determine active tab based on route
   const getActiveTab = () => {
     if (location.pathname.includes('/pets/register')) return 'register';
     if (location.pathname.includes('/pets/mypets')) return 'mypets';
     if (location.pathname.includes('/pets/list')) return 'petslist';
-    return 'mypets'; // default
+    return 'mypets';
   };
 
   const activeTab = getActiveTab();
@@ -82,7 +81,6 @@ const PetsModule = () => {
               </CNav>
             </CCol>
             <CCol md={9}>
-              {/* Content rendered by individual route */}
               <div className="pets-content-area">
                 <Routes>
                   <Route path="mypets" element={<MyPets />} />

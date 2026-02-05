@@ -16,12 +16,9 @@ import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser, cilCalendar, cilEnvelopeClosed, cilPhone } from '@coreui/icons'
 import '../../css/register/Register.css'
 
-const API = "http://localhost:3001"
-
 const Register = () => {
   const navigate = useNavigate()
 
-  // Estado de formulario
   const [formData, setFormData] = useState({
     nombres: '',
     apellidos: '',
@@ -34,13 +31,10 @@ const Register = () => {
     repetirContrasena: '',
   })
 
-  // Estado de errores
   const [errors, setErrors] = useState({})
-
-  // Ver contraseña
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  // Expresiones regulares
   const regex = useMemo(() => ({
     nombre: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,100}$/,
     usuario: /^[A-Za-z0-9._-]{4,50}$/,
@@ -49,7 +43,6 @@ const Register = () => {
     passwordFuerte: /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
   }), [])
 
-  // Validación individual
   const validarCampo = (name, value) => {
     switch (name) {
       case 'nombres':
@@ -110,14 +103,12 @@ const Register = () => {
     }
   }
 
-  // Manejo de inputs
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
     setErrors(prev => ({ ...prev, [name]: validarCampo(name, value) }))
   }
 
-  // Validación general
   const validarFormularioCompleto = () => {
     const nuevosErrores = {}
     Object.keys(formData).forEach(campo => {
@@ -127,13 +118,15 @@ const Register = () => {
     return Object.values(nuevosErrores).every(msg => msg === '')
   }
 
-  // ENVÍO REAL DE DATOS AL BACKEND
   const handleRegister = async (e) => {
     e.preventDefault()
+    setLoading(true)
 
-    if (!validarFormularioCompleto()) return
+    if (!validarFormularioCompleto()) {
+      setLoading(false)
+      return
+    }
 
-    // Estructura compatible con login
     const payload = {
       nombre: `${formData.nombres} ${formData.apellidos}`,
       correo: formData.correo,
@@ -145,19 +138,21 @@ const Register = () => {
     }
 
     try {
-      await fetch(`${API}/clientes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
+      // Aquí irá la conexión a tu backend
+      // Ejemplo: await fetch('tu-backend-url/api/auth/register', {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(payload)
+      // });
 
       alert("Registro exitoso. Ahora puedes iniciar sesión.")
 
-      // Redirigir al login y pasar datos opcionales para autocompletar
       navigate('/login', { state: { usuario: formData.usuario, correo: formData.correo } })
 
     } catch (error) {
       alert("Error al registrarse.")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -171,7 +166,6 @@ const Register = () => {
           <CCol lg={10} xl={9}>
             <CCard className="auth-card">
 
-              {/* Panel izquierdo */}
               <CCardBody className="auth-card-inner">
                 <CForm className="auth-form" onSubmit={handleRegister} noValidate>
 
@@ -180,63 +174,55 @@ const Register = () => {
                     <p>Crea tu cuenta</p>
                   </div>
 
-                  {/* Nombres */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
                     <CFormInput name="nombres" placeholder="Nombres"
-                      value={formData.nombres} onChange={handleChange} />
+                      value={formData.nombres} onChange={handleChange} disabled={loading} />
                   </CInputGroup>
                   {renderError('nombres')}
 
-                  {/* Apellidos */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
                     <CFormInput name="apellidos" placeholder="Apellidos"
-                      value={formData.apellidos} onChange={handleChange} />
+                      value={formData.apellidos} onChange={handleChange} disabled={loading} />
                   </CInputGroup>
                   {renderError('apellidos')}
 
-                  {/* Fecha nacimiento */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilCalendar} /></CInputGroupText>
                     <CFormInput type="date" name="fecha_nacimiento"
-                      value={formData.fecha_nacimiento} onChange={handleChange} />
+                      value={formData.fecha_nacimiento} onChange={handleChange} disabled={loading} />
                   </CInputGroup>
                   {renderError('fecha_nacimiento')}
 
-                  {/* Teléfono */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilPhone} /></CInputGroupText>
                     <CFormInput name="telefono" placeholder="Teléfono"
-                      value={formData.telefono} onChange={handleChange} />
+                      value={formData.telefono} onChange={handleChange} disabled={loading} />
                   </CInputGroup>
                   {renderError('telefono')}
 
-                  {/* Dirección */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilEnvelopeClosed} /></CInputGroupText>
                     <CFormInput name="direccion" placeholder="Dirección"
-                      value={formData.direccion} onChange={handleChange} />
+                      value={formData.direccion} onChange={handleChange} disabled={loading} />
                   </CInputGroup>
                   {renderError('direccion')}
 
-                  {/* Usuario */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
                     <CFormInput name="usuario" placeholder="Usuario"
-                      value={formData.usuario} onChange={handleChange} />
+                      value={formData.usuario} onChange={handleChange} disabled={loading} />
                   </CInputGroup>
                   {renderError('usuario')}
 
-                  {/* Correo */}
                   <CInputGroup className="mb-2">
                     <CInputGroupText><CIcon icon={cilEnvelopeClosed} /></CInputGroupText>
                     <CFormInput name="correo" placeholder="Correo"
-                      value={formData.correo} onChange={handleChange} />
+                      value={formData.correo} onChange={handleChange} disabled={loading} />
                   </CInputGroup>
                   {renderError('correo')}
 
-                  {/* Contraseña */}
                   <CInputGroup className="mb-2 password-wrapper">
                     <CInputGroupText><CIcon icon={cilLockLocked} /></CInputGroupText>
                     <CFormInput
@@ -245,6 +231,7 @@ const Register = () => {
                       placeholder="Contraseña"
                       value={formData.contrasena}
                       onChange={handleChange}
+                      disabled={loading}
                     />
                     <button type="button" className="btn-ver-password"
                       onClick={() => setShowPassword(!showPassword)}>
@@ -253,7 +240,6 @@ const Register = () => {
                   </CInputGroup>
                   {renderError('contrasena')}
 
-                  {/* Repetir contraseña */}
                   <CInputGroup className="mb-3 password-wrapper">
                     <CInputGroupText><CIcon icon={cilLockLocked} /></CInputGroupText>
                     <CFormInput
@@ -262,6 +248,7 @@ const Register = () => {
                       placeholder="Repetir contraseña"
                       value={formData.repetirContrasena}
                       onChange={handleChange}
+                      disabled={loading}
                     />
                     <button type="button" className="btn-ver-password"
                       onClick={() => setShowPassword(!showPassword)}>
@@ -270,11 +257,12 @@ const Register = () => {
                   </CInputGroup>
                   {renderError('repetirContrasena')}
 
-                  <CButton type="submit" className="btn">Crear cuenta</CButton>
+                  <CButton type="submit" className="btn" disabled={loading}>
+                    {loading ? "Registrando..." : "Crear cuenta"}
+                  </CButton>
                 </CForm>
               </CCardBody>
 
-              {/* Panel derecho */}
               <CCardBody className="auth-card-right">
                 <h2>Únete a nuestra comunidad</h2>
                 <p>

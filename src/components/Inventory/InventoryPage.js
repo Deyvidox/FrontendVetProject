@@ -1,39 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { CButton, CModal, CModalBody, CModalHeader, CModalTitle } from '@coreui/react';
-import axios from 'axios';
 import InventoryForm from './InventoryForm';
-import InventoryTable from './../InventoryTable';
+import InventoryTable from './InventoryTable';
+import AlertModal from './AlertModal';
 import '../../css/Inventory/inventory.css';
 
 const InventoryPage = () => {
   const [inventory, setInventory] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
-
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMsg, setAlertMsg] = useState('');
   const [alertType, setAlertType] = useState('success');
+  const [loading, setLoading] = useState(false);
 
-  // Cargar inventario desde JSON Server
   useEffect(() => {
     const fetchInventory = async () => {
+      setLoading(true);
       try {
-        const res = await axios.get('http://localhost:3000/inventory');
-        setInventory(res.data);
+        // Aquí irá la conexión a tu backend
+        // Ejemplo: const res = await fetch('tu-backend-url/api/inventory');
+        // setInventory(res.data);
+        
+        setInventory([]);
       } catch (err) {
         console.error('Error al cargar inventario', err);
         setAlertMsg('Error al cargar inventario');
         setAlertType('error');
         setAlertOpen(true);
+      } finally {
+        setLoading(false);
       }
     };
     fetchInventory();
   }, []);
 
-  // Crear o editar producto
   const handleSave = async (product) => {
+    setLoading(true);
     try {
-      // Inicializar campos opcionales para evitar problemas
       const payload = {
         nombre: product.nombre || '',
         tipo: product.tipo || 'Otro',
@@ -45,21 +49,22 @@ const InventoryPage = () => {
         imagen_url: product.imagen_url || '',
       };
 
+      // Aquí irá la conexión a tu backend
       if (editProduct) {
-        // Editar producto existente
-        const res = await axios.put(`http://localhost:3001/inventory/${editProduct.id}`, payload, {
-          headers: { 'Content-Type': 'application/json' },
-        });
-        setInventory(prev =>
-          prev.map(item => (item.id === editProduct.id ? res.data : item))
-        );
+        // Ejemplo: await fetch(`tu-backend-url/api/inventory/${editProduct.id}`, {
+        //   method: 'PUT',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(payload)
+        // });
+        
         setAlertMsg('Producto actualizado correctamente');
       } else {
-        // Crear nuevo producto
-        const res = await axios.post('http://localhost:3001/inventory', payload, {
-          headers: { 'Content-Type': 'application/json' },
-        });
-        setInventory(prev => [...prev, res.data]);
+        // Ejemplo: await fetch('tu-backend-url/api/inventory', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(payload)
+        // });
+        
         setAlertMsg('Producto agregado correctamente');
       }
 
@@ -73,20 +78,23 @@ const InventoryPage = () => {
       setAlertMsg('Error al guardar producto');
       setAlertType('error');
       setAlertOpen(true);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Abrir modal de edición
   const handleEdit = (product) => {
     setEditProduct(product);
     setShowModal(true);
   };
 
-  // Eliminar producto
   const handleDelete = async (id) => {
     if (window.confirm('¿Desea eliminar este producto?')) {
+      setLoading(true);
       try {
-        await axios.delete(`http://localhost:3001/inventory/${id}`);
+        // Aquí irá la conexión a tu backend
+        // Ejemplo: await fetch(`tu-backend-url/api/inventory/${id}`, { method: 'DELETE' });
+        
         setInventory(prev => prev.filter(item => item.id !== id));
         setAlertMsg('Producto eliminado correctamente');
         setAlertType('success');
@@ -96,21 +104,37 @@ const InventoryPage = () => {
         setAlertMsg('Error al eliminar producto');
         setAlertType('error');
         setAlertOpen(true);
+      } finally {
+        setLoading(false);
       }
     }
   };
 
   return (
     <div className="container">
-      <CButton color="primary" className="add-product-btn" onClick={() => setShowModal(true)}>
-        Agregar Producto
+      <CButton 
+        color="primary" 
+        className="add-product-btn" 
+        onClick={() => setShowModal(true)}
+        disabled={loading}
+      >
+        {loading ? "Cargando..." : "Agregar Producto"}
       </CButton>
 
-      <InventoryTable
-        inventory={inventory}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      {loading ? (
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Cargando...</span>
+          </div>
+          <p className="mt-2">Cargando inventario...</p>
+        </div>
+      ) : (
+        <InventoryTable
+          inventory={inventory}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      )}
 
       <CModal visible={showModal} onClose={() => setShowModal(false)}>
         <CModalHeader>
@@ -124,6 +148,13 @@ const InventoryPage = () => {
           />
         </CModalBody>
       </CModal>
+
+      <AlertModal
+        isOpen={alertOpen}
+        message={alertMsg}
+        type={alertType}
+        onClose={() => setAlertOpen(false)}
+      />
     </div>
   );
 };

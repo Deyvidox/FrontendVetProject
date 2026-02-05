@@ -1,32 +1,12 @@
-// AppointmentForm.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import AlertModal from "./../AlertModal";
+import AlertModal from "./AlertModal";
 import {
   appointmentSchema,
   defaultAppointmentValues,
 } from "./AppointmentSchema";
-
 import "../../css/Inventory/inventory.css";
-
-// ----------------------------------------------------------------------
-// CONFIGURACIÓN CLOUDINARY (puedes reemplazar con tus valores reales)
-// ----------------------------------------------------------------------
-const CLOUDINARY_UPLOAD_URL =
-  "https://api.cloudinary.com/v1_1/<tu_cloud_name>/image/upload";
-const CLOUDINARY_UPLOAD_PRESET = "<tu_unsigned_preset>";
-
-// ----------------------------------------------------------------------
-// PROPS:
-// onSubmit(payload)
-// mascotas
-// veterinarios
-// appointments
-// initialValues
-// onClose()
-// ----------------------------------------------------------------------
 
 const AppointmentForm = ({
   onSubmit,
@@ -48,23 +28,19 @@ const AppointmentForm = ({
     defaultValues: initialValues,
   });
 
-  // ----------------------------------------------------------------------
-  // ACTUALIZAR FORMULARIO EN MODO EDICIÓN
-  // ----------------------------------------------------------------------
   useEffect(() => {
     reset(initialValues);
   }, [initialValues, reset]);
 
-  // ----------------------------------------------------------------------
-  // WATCH VALUES
-  // ----------------------------------------------------------------------
   const estadoValue = watch("estado");
   const fechaValue = watch("fecha_cita");
   const vetValue = watch("veterinario_id");
 
-  // ----------------------------------------------------------------------
-  // VALIDACIÓN DE DOBLE BOOKING
-  // ----------------------------------------------------------------------
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState("success");
+  const [modalMsg, setModalMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const isDoubleBooked = () => {
     if (!vetValue || !fechaValue) return false;
 
@@ -77,53 +53,54 @@ const AppointmentForm = ({
     );
   };
 
-  // ----------------------------------------------------------------------
-  // ESTADOS PARA ALERTMODAL
-  // ----------------------------------------------------------------------
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState("success");
-  const [modalMsg, setModalMsg] = useState("");
-
-  // ----------------------------------------------------------------------
-  // ENVÍO DE FORMULARIO
-  // ----------------------------------------------------------------------
-  const submitHandler = (data) => {
+  const submitHandler = async (data) => {
     if (isDoubleBooked()) {
       setModalType("error");
       setModalMsg("El veterinario ya tiene una cita en ese horario.");
       setModalOpen(true);
       return;
     }    
+    setLoading(true);
 
-    const payloa = {
-      ...data,
-      mascota_id: Number(data.mascota_id),
-      veterinario_id: Number(data.veterinario_id),
-      fecha_cita: new Date(data.fecha_cita).toISOString(),
-    };
+    try {
+      const payload = {
+        ...data,
+        mascota_id: Number(data.mascota_id),
+        veterinario_id: Number(data.veterinario_id),
+        fecha_cita: new Date(data.fecha_cita).toISOString(),
+      };
 
-    onSubmit(payload);
-    setModalType("success");
-    setModalMsg("Cita registrada correctamente.");
-    setModalOpen(true);
+      await onSubmit(payload);
 
-    reset(defaultAppointmentValues);
+      setModalType("success");
+      setModalMsg("Cita registrada correctamente.");
+      setModalOpen(true);
 
-    if (onClose) onClose();
+      reset(defaultAppointmentValues);
+
+      if (onClose) {
+        setTimeout(() => {
+          onClose();
+        }, 1500);
+      }
+    } catch (error) {
+      setModalType("error");
+      setModalMsg(error.message || "Error al guardar la cita.");
+      setModalOpen(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ----------------------------------------------------------------------
-  // SUBIDA DE IMÁGENES A CLOUDINARY
-  // ----------------------------------------------------------------------
   const handleCloudinaryUpload = async (file) => {
     if (!file) return;
 
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+      formData.append("upload_preset", "tu_upload_preset");
 
-      const res = await fetch(CLOUDINARY_UPLOAD_URL, {
+      const res = await fetch("https://api.cloudinary.com/v1_1/tu_cloud_name/image/upload", {
         method: "POST",
         body: formData,
       });
@@ -132,7 +109,6 @@ const AppointmentForm = ({
 
       if (json.secure_url) {
         setValue("evidencia_url", json.secure_url);
-
         setModalType("success");
         setModalMsg("Imagen subida correctamente.");
         setModalOpen(true);
@@ -141,26 +117,20 @@ const AppointmentForm = ({
       }
     } catch (error) {
       setModalType("error");
-      setModalMsg(
-        "Error al subir la imagen. Verifica la configuración de Cloudinary."
-      );
+      setModalMsg("Error al subir la imagen.");
       setModalOpen(true);
     }
   };
 
-  // ----------------------------------------------------------------------
-  // FORMULARIO
-  // ----------------------------------------------------------------------
   return (
     <form onSubmit={handleSubmit()} className="appointment-form">
       <div className="auth-header">
-        <h1>Crear o editar cita</h1>
+        <h1>{initialValues.id ? "Editar Cita" : "Crear Cita"}</h1>
         <p>Completa los datos para agendar tu cita.</p>
       </div>
 
-      {/* Mascota */}
       <label>Mascota</label>
-      <select {...register("mascota_id")}>
+      <select {...register("mascota_id")} disabled={loading}>
         <option value="">Selecciona una mascota</option>
         {mascotas.map((m) => (
           <option key={m.id} value={m.id}>
@@ -172,9 +142,8 @@ const AppointmentForm = ({
         <span className="text-danger">{errors.mascota_id.message}</span>
       )}
 
-      {/* Veterinario */}
       <label>Veterinario</label>
-      <select {...register("veterinario_id")}>
+      <select {...register("veterinario_id")} disabled={loading}>
         <option value="">Selecciona un veterinario</option>
         {veterinarios.map((v) => (
           <option key={v.id} value={v.id}>
@@ -186,23 +155,24 @@ const AppointmentForm = ({
         <span className="text-danger">{errors.veterinario_id.message}</span>
       )}
 
-      {/* Fecha y hora */}
       <label>Fecha y hora de la cita</label>
-      <input type="datetime-local" {...register("fecha_cita")} />
+      <input 
+        type="datetime-local" 
+        {...register("fecha_cita")} 
+        disabled={loading}
+      />
       {errors.fecha_cita && (
         <span className="text-danger">{errors.fecha_cita.message}</span>
       )}
 
-      {/* Estado */}
       <label>Estado</label>
-      <select {...register("estado")}>
+      <select {...register("estado")} disabled={loading}>
         <option value="Pendiente">Pendiente</option>
         <option value="Confirmada">Confirmada</option>
         <option value="Cancelada">Cancelada</option>
         <option value="Completada">Completada</option>
       </select>
 
-      {/* Notas */}
       <label>Notas</label>
       <textarea
         {...register("notas")}
@@ -211,23 +181,25 @@ const AppointmentForm = ({
             ? "Explica el motivo de la cancelación"
             : "Notas de la cita"
         }
+        disabled={loading}
       />
       {errors.notas && (
         <span className="text-danger">{errors.notas.message}</span>
       )}
 
-      {/* Evidencia */}
       <label>Evidencia (imagen)</label>
       <div className="upload-row">
         <input
           type="url"
           placeholder="URL de la imagen (opcional)"
           {...register("evidencia_url")}
+          disabled={loading}
         />
         <input
           type="file"
           accept="image/*"
           onChange={(e) => handleCloudinaryUpload(e.target.files?.[0])}
+          disabled={loading}
         />
       </div>
 
@@ -237,8 +209,8 @@ const AppointmentForm = ({
         </span>
       )}
 
-      <button type="submit" className="btn">
-        Guardar cita
+      <button type="submit" className="btn" disabled={loading}>
+        {loading ? "Guardando..." : "Guardar cita"}
       </button>
 
       <AlertModal
