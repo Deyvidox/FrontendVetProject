@@ -62,18 +62,31 @@ const ProfileModal = ({ show, onClose, userData = {} }) => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setLoading(true);
     
-    // Simulación de guardado
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      // Aquí irá la conexión a tu backend
+      // Ejemplo: await fetch(`tu-backend-url/api/users/${userData.id}`, {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(formData)
+      // });
+      
       setAlert({
         show: true,
         message: 'Profile updated successfully',
         type: 'success'
       });
-    }, 1500);
+    } catch (error) {
+      setAlert({
+        show: true,
+        message: 'Error updating profile',
+        type: 'danger'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleTriggerFileInput = () => {

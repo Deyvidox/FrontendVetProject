@@ -23,8 +23,6 @@ import { cilSearch, cilHeart, cilPencil, cilTrash } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import '../../css/pets/PetsList.css';
 
-const API_URL = "http://localhost:3001";
-
 const PetsList = ({ onPetUpdate, onPetDelete, onPetAdd }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,13 +37,13 @@ const PetsList = ({ onPetUpdate, onPetDelete, onPetAdd }) => {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`${API_URL}/pets`);
-        if (!response.ok) {
-          throw new Error('Error loading pets');
-        }
+        // Aquí irá la conexión a tu backend
+        // Ejemplo: const response = await fetch('tu-backend-url/api/pets');
+        // const petsData = await response.json();
+        // setPets(petsData);
         
-        const petsData = await response.json();
-        setPets(petsData);
+        setPets([]);
+        
       } catch (error) {
         console.error('Error loading pets:', error);
         setError('Failed to load pets. Please try again.');
@@ -57,7 +55,6 @@ const PetsList = ({ onPetUpdate, onPetDelete, onPetAdd }) => {
     loadPets();
   }, []);
 
-  // Filter pets based on search
   const filteredPets = pets.filter(pet =>
     pet.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pet.breed?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -65,7 +62,6 @@ const PetsList = ({ onPetUpdate, onPetDelete, onPetAdd }) => {
     pet.species?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Pagination
   const indexOfLastPet = currentPage * petsPerPage;
   const indexOfFirstPet = indexOfLastPet - petsPerPage;
   const currentPets = filteredPets.slice(indexOfFirstPet, indexOfLastPet);
@@ -73,21 +69,15 @@ const PetsList = ({ onPetUpdate, onPetDelete, onPetAdd }) => {
 
   const handleEdit = (petId) => {
     console.log('Edit pet:', petId);
-    // Aquí podrías abrir un modal de edición
   };
 
   const handleDelete = async (petId) => {
     if (window.confirm('Are you sure you want to delete this pet?')) {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/pets/${petId}`, {
-          method: 'DELETE',
-        });
-
-        if (!response.ok) {
-          throw new Error('Error deleting pet');
-        }
-
+        // Aquí irá la conexión a tu backend
+        // Ejemplo: await fetch(`tu-backend-url/api/pets/${petId}`, { method: 'DELETE' });
+        
         setPets(prevPets => prevPets.filter(pet => pet.id !== petId));
       } catch (error) {
         console.error('Error deleting pet:', error);
@@ -152,7 +142,6 @@ const PetsList = ({ onPetUpdate, onPetDelete, onPetAdd }) => {
           </CAlert>
         )}
 
-        {/* Search Bar */}
         <div className="pets-search-container">
           <CInputGroup>
             <CInputGroupText className="pets-search-icon">
@@ -170,7 +159,6 @@ const PetsList = ({ onPetUpdate, onPetDelete, onPetAdd }) => {
           </CInputGroup>
         </div>
 
-        {/* Pets Table */}
         <div className="pets-table-container">
           <CTable responsive striped hover className="pets-table">
             <CTableHead>
@@ -209,7 +197,7 @@ const PetsList = ({ onPetUpdate, onPetDelete, onPetAdd }) => {
                     </CTableDataCell>
                     <CTableDataCell>{getStatusBadge(pet.status)}</CTableDataCell>
                     <CTableDataCell>
-                      {new Date(pet.createdAt).toLocaleDateString('en-US')}
+                      {pet.createdAt ? new Date(pet.createdAt).toLocaleDateString('en-US') : '-'}
                     </CTableDataCell>
                     <CTableDataCell>
                       <div className="pets-actions-container">
@@ -255,7 +243,6 @@ const PetsList = ({ onPetUpdate, onPetDelete, onPetAdd }) => {
           </CTable>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="pets-pagination">
             <CPagination align="center">
@@ -286,7 +273,6 @@ const PetsList = ({ onPetUpdate, onPetDelete, onPetAdd }) => {
           </div>
         )}
 
-        {/* Pagination Info */}
         <div className="pets-pagination-info text-center mt-2">
           Showing {currentPets.length} of {filteredPets.length} pets
           {searchTerm && ` (filtered from ${pets.length} total)`}

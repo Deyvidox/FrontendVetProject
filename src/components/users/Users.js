@@ -4,8 +4,6 @@ import UserList from "./UserList";
 import UserStats from "./UserStats";
 import '../../css/users/Users.css';
 
-const API_URL = "http://localhost:3001";
-
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,13 +15,13 @@ const Users = () => {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`${API_URL}/users`);
-        if (!response.ok) {
-          throw new Error('Error loading users');
-        }
+        // Aquí irá la conexión a tu backend
+        // Ejemplo: const response = await fetch('tu-backend-url/api/users');
+        // const usersData = await response.json();
+        // setUsers(usersData);
         
-        const usersData = await response.json();
-        setUsers(usersData);
+        setUsers([]);
+        
       } catch (error) {
         console.error('Error loading users:', error);
         setError('Failed to load users. Please try again.');
@@ -35,25 +33,18 @@ const Users = () => {
     loadUsers();
   }, []);
 
-  // CRUD Operations
   const handleUserUpdate = async (updatedUser) => {
     try {
-      const response = await fetch(`${API_URL}/users/${updatedUser.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedUser),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error updating user');
-      }
-
-      const updatedUserData = await response.json();
+      // Aquí irá la conexión a tu backend
+      // Ejemplo: await fetch(`tu-backend-url/api/users/${updatedUser.id}`, {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(updatedUser)
+      // });
+      
       setUsers(prevUsers => 
         prevUsers.map(user => 
-          user.id === updatedUserData.id ? updatedUserData : user
+          user.id === updatedUser.id ? updatedUser : user
         )
       );
     } catch (error) {
@@ -64,14 +55,9 @@ const Users = () => {
 
   const handleUserDelete = async (userId) => {
     try {
-      const response = await fetch(`${API_URL}/users/${userId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Error deleting user');
-      }
-
+      // Aquí irá la conexión a tu backend
+      // Ejemplo: await fetch(`tu-backend-url/api/users/${userId}`, { method: 'DELETE' });
+      
       setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -81,25 +67,14 @@ const Users = () => {
 
   const handleUserAdd = async (newUser) => {
     try {
-      const response = await fetch(`${API_URL}/users`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...newUser,
-          status: 'active',
-          avatar: '',
-          createdAt: new Date().toISOString().split('T')[0]
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error adding user');
-      }
-
-      const createdUser = await response.json();
-      setUsers(prevUsers => [...prevUsers, createdUser]);
+      // Aquí irá la conexión a tu backend
+      // Ejemplo: await fetch('tu-backend-url/api/users', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(newUser)
+      // });
+      
+      setUsers(prevUsers => [...prevUsers, newUser]);
     } catch (error) {
       console.error('Error adding user:', error);
       throw error;
@@ -145,10 +120,8 @@ const Users = () => {
     <CContainer fluid className="users-container px-4">
       <h1 className="users-title mt-4">Users Management</h1>
       
-      {/* Statistics */}
       <UserStats users={users}/>
       
-      {/* Users List */}
       <UserList 
         users={users} 
         onUserUpdate={handleUserUpdate}

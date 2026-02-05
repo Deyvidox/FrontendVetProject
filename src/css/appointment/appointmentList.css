@@ -1,227 +1,239 @@
-/* ===============================================
-   🎨 Paleta y fuente — igual que módulo Usuarios
-   =============================================== */
-:root {
-  --primary: #321fdb;
-  --primary-dark: #1f1498;
-  --primary-light: #f8f9fa;
-  --border: #d8dbe0;
-  --border-light: #eaeef2;
-  --text-dark: #2c3e50;
-  --text-muted: #6c757d;
-  --danger: #e55353;
-  --warning: #f9b115;
-  --success: #2eb85c;
+/* ============================
+   Lista de Citas - Consistente con Users
+   ============================ */
+
+/* Contenedor de la lista */
+.appointment-list-container {
+  margin-top: 1.5rem;
 }
 
-body {
-  font-family: "Poppins", sans-serif;
-  background-color: #f8f9fa;
-  margin: 0;
-  padding: 1.5rem;
-}
-
-/* ===============================================
-   📌 Contenedor principal — igual a Usuarios
-   =============================================== */
-.appointment-list-section {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  animation: fadeIn 0.4s ease;
-}
-
-/* ===============================================
-   📋 Header y filtros — igual que Usuarios
-   =============================================== */
-.list-header {
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--primary);
-  padding-bottom: 0.75rem;
-}
-
-.list-title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--primary);
-}
-
-.list-summary {
-  color: var(--text-muted);
-  margin-top: 0.25rem;
-}
-
-.filtros {
+/* Cabecera de la lista */
+.appointment-list-header {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #d8dbe0;
+}
+
+.appointment-list-header h3 {
+  margin: 0;
+  color: #321fdb;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+/* Controles de la lista */
+.appointment-controls {
+  display: flex;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: 1rem;
+  align-items: center;
 }
 
-.filtros input,
-.filtros select {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.65rem 1rem;
-  background: white;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
+.appointment-search {
+  position: relative;
+  min-width: 250px;
 }
 
-.filtros input:focus,
-.filtros select:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 0.2rem rgba(50,31,219,0.15);
-}
-
-.filtros button {
-  border: none;
-  border-radius: 8px;
-  padding: 0.65rem 1rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: white;
-  transition: 0.2s ease;
-}
-
-.filtros button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(50,31,219,0.35);
-}
-
-/* ===============================================
-   🗂 Tabla estilo Inventario
-   =============================================== */
-table {
+.appointment-search input {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
-  color: var(--text-dark);
+  padding: 0.375rem 2rem 0.375rem 0.75rem;
+  border: 1px solid #d8dbe0;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
 }
 
-th, td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border: 1px solid var(--border-light);
+.appointment-search-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
 }
 
-th {
-  background-color: var(--primary-light);
-  color: var(--text-dark);
-  font-weight: 600;
+/* Filtros de estado */
+.status-filters {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
 }
 
-tr:hover {
-  background-color: #f1f3f6;
-}
-
-/* Badges — iguales a Users */
-.tag {
-  padding: 0.35em 0.75em;
-  border-radius: 8px;
+.status-filter-btn {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #d8dbe0;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #6c757d;
   font-size: 0.75rem;
-  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-filter-btn.active {
+  background: #321fdb;
   color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  border-color: #321fdb;
 }
 
-.tag-pendiente { background: var(--warning); }
-.tag-confirmada { background: var(--primary); }
-.tag-cancelada { background: var(--danger); }
-.tag-completada { background: var(--success); }
+.status-filter-btn:hover:not(.active) {
+  background: #f8f9fa;
+}
 
-/* Botones de acciones */
-button {
-  border: none;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  padding: 0.5rem 0.9rem;
+/* Botones de exportación */
+.export-buttons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.export-btn {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #d8dbe0;
+  border-radius: 0.375rem;
+  background: #ffffff;
+  color: #6c757d;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-btn:hover {
+  background: #f8f9fa;
+  color: #321fdb;
+}
+
+/* Tarjetas de citas (vista tarjeta) */
+.appointment-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.appointment-card {
+  background: #ffffff;
+  border: 1px solid #d8dbe0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.appointment-card:hover {
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.appointment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.appointment-card-title {
+  margin: 0;
+  font-size: 1rem;
   font-weight: 600;
-  background: var(--primary);
-  color: white;
-  transition: 0.2s ease;
+  color: #2c3e50;
 }
 
-button:hover {
-  background: var(--primary-dark);
-  transform: translateY(-1px);
+.appointment-card-body {
+  font-size: 0.875rem;
+  color: #6c757d;
 }
 
-button.danger {
-  background: var(--danger);
+.appointment-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f8f9fa;
 }
 
-button.danger:hover {
-  background: #d93737;
+/* Acciones en tarjetas */
+.appointment-actions {
+  display: flex;
+  gap: 0.25rem;
 }
 
-/* ===============================================
-   ⚠ Modal estilo Usuarios
-   =============================================== */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
+.action-btn {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d8dbe0;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #6c757d;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: #f8f9fa;
+}
+
+.action-btn-edit:hover {
+  color: #321fdb;
+  border-color: #321fdb;
+}
+
+.action-btn-delete:hover {
+  color: #e55353;
+  border-color: #e55353;
+}
+
+/* Vista de tabla */
+.appointment-table-view {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .appointment-table-view {
+    display: block;
+  }
+  
+  .appointment-cards {
+    display: none;
+  }
+}
+
+/* Paginación */
+.appointment-pagination {
+  margin-top: 1.5rem;
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 999;
 }
 
-.modal-content {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  max-width: 400px;
-  padding: 1.5rem;
-  text-align: center;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.20);
-}
-
-.modal-content p {
-  color: var(--text-dark);
-  margin-bottom: 1rem;
-}
-
-.modal-content button {
-  background: var(--primary);
-  border: none;
-  padding: 0.65rem 1.25rem;
-  border-radius: 8px;
-  font-weight: 600;
-  color: white;
-}
-
-.modal-content button:hover {
-  background: var(--primary-dark);
-}
-
-/* ===============================================
-   📱 Responsive
-   =============================================== */
-@media (max-width: 1024px) {
-  .filtros {
+/* Responsive */
+@media (max-width: 768px) {
+  .appointment-list-header {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
-  th, td {
-    font-size: 0.85rem;
-    padding: 0.6rem 0.8rem;
+  
+  .appointment-controls {
+    width: 100%;
   }
-}
-
-@media (max-width: 640px) {
-  .appointment-list-section { padding: 1rem; }
-  .filtros input, .filtros select, .filtros button { width: 100%; }
-}
-
-/* ===============================================
-   🎞️ Animación — igual a Usuarios
-   =============================================== */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  
+  .appointment-search {
+    min-width: 100%;
+  }
+  
+  .appointment-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .appointment-card-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .appointment-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
