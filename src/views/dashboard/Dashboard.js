@@ -1,387 +1,461 @@
-import React from 'react'
-import classNames from 'classnames'
-
+import React, { useState, useEffect } from 'react';
 import {
-  CAvatar,
-  CButton,
-  CButtonGroup,
   CCard,
   CCardBody,
-  CCardFooter,
   CCardHeader,
   CCol,
-  CProgress,
   CRow,
-  CTable,
-  CTableBody,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
+  CProgress,
+  CAlert,
+  CButton,
+  CListGroup,
+  CListGroupItem,
+  CProgressBar,
+} from '@coreui/react';
+import CIcon from '@coreui/icons-react';
 import {
-  cibCcAmex,
-  cibCcApplePay,
-  cibCcMastercard,
-  cibCcPaypal,
-  cibCcStripe,
-  cibCcVisa,
-  cibGoogle,
-  cibFacebook,
-  cibLinkedin,
-  cifBr,
-  cifEs,
-  cifFr,
-  cifIn,
-  cifPl,
-  cifUs,
-  cibTwitter,
-  cilCloudDownload,
-  cilPeople,
+  cilCalendar,
+  cilHeart,
   cilUser,
-  cilUserFemale,
-} from '@coreui/icons'
+  cilPaw,
+  cilClipboard,
+  cilBell,
+  cilChartLine,
+  cilClock,
+  cilMedicalCross,
+  cilStar,
+  cilWarning,
+  cilCheckCircle,
+  cilInbox,
+  cilShieldAlt,
+} from '@coreui/icons';
+import '../../css/dashboard/Dashboard.css'
 
-import avatar1 from 'src/assets/images/avatars/1.jpg'
-import avatar2 from 'src/assets/images/avatars/2.jpg'
-import avatar3 from 'src/assets/images/avatars/3.jpg'
-import avatar4 from 'src/assets/images/avatars/4.jpg'
-import avatar5 from 'src/assets/images/avatars/5.jpg'
-import avatar6 from 'src/assets/images/avatars/6.jpg'
-
-import WidgetsBrand from '../widgets/WidgetsBrand'
-import WidgetsDropdown from '../widgets/WidgetsDropdown'
-import MainChart from './MainChart'
 
 const Dashboard = () => {
-  const progressExample = [
-    { title: 'Visits', value: '29.703 Users', percent: 40, color: 'success' },
-    { title: 'Unique', value: '24.093 Users', percent: 20, color: 'info' },
-    { title: 'Pageviews', value: '78.706 Views', percent: 60, color: 'warning' },
-    { title: 'New Users', value: '22.123 Users', percent: 80, color: 'danger' },
-    { title: 'Bounce Rate', value: 'Average Rate', percent: 40.15, color: 'primary' },
-  ]
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalPets: 0,
+    upcomingAppointments: 0,
+    pendingTasks: 0,
+    recentActivity: 0,
+  });
 
-  const progressGroupExample1 = [
-    { title: 'Monday', value1: 34, value2: 78 },
-    { title: 'Tuesday', value1: 56, value2: 94 },
-    { title: 'Wednesday', value1: 12, value2: 67 },
-    { title: 'Thursday', value1: 43, value2: 91 },
-    { title: 'Friday', value1: 22, value2: 73 },
-    { title: 'Saturday', value1: 53, value2: 82 },
-    { title: 'Sunday', value1: 9, value2: 69 },
-  ]
+  useEffect(() => {
+    // Simulate user data loading
+    const loadUserData = () => {
+      setLoading(true);
+      
+      // In a real implementation, you would get the logged-in user's data
+      const userData = JSON.parse(localStorage.getItem('usuarioLogueado')) || {
+        id: 1,
+        usuario: 'Demo User',
+        correo: 'demo@vetclinic.com',
+        role: 'Client',
+      };
+      
+      setUserInfo(userData);
+      
+      // Simulate statistics based on user role
+      const userRole = userData.role || 'Client';
+      let mockStats = {
+        totalPets: 0,
+        upcomingAppointments: 0,
+        pendingTasks: 0,
+        recentActivity: 0,
+      };
 
-  const progressGroupExample2 = [
-    { title: 'Male', icon: cilUser, value: 53 },
-    { title: 'Female', icon: cilUserFemale, value: 43 },
-  ]
+      switch(userRole) {
+        case 'Administrator':
+          mockStats = {
+            totalPets: 45,
+            upcomingAppointments: 12,
+            pendingTasks: 8,
+            recentActivity: 23,
+          };
+          break;
+        case 'Veterinarian':
+          mockStats = {
+            totalPets: 28,
+            upcomingAppointments: 6,
+            pendingTasks: 3,
+            recentActivity: 15,
+          };
+          break;
+        case 'Client':
+          mockStats = {
+            totalPets: 2,
+            upcomingAppointments: 1,
+            pendingTasks: 0,
+            recentActivity: 5,
+          };
+          break;
+        default:
+          mockStats = {
+            totalPets: 0,
+            upcomingAppointments: 0,
+            pendingTasks: 0,
+            recentActivity: 0,
+          };
+      }
+      
+      setStats(mockStats);
+      setLoading(false);
+    };
 
-  const progressGroupExample3 = [
-    { title: 'Organic Search', icon: cibGoogle, percent: 56, value: '191,235' },
-    { title: 'Facebook', icon: cibFacebook, percent: 15, value: '51,223' },
-    { title: 'Twitter', icon: cibTwitter, percent: 11, value: '37,564' },
-    { title: 'LinkedIn', icon: cibLinkedin, percent: 8, value: '27,319' },
-  ]
+    loadUserData();
+  }, []);
 
-  const tableExample = [
-    {
-      avatar: { src: avatar1, status: 'success' },
-      user: {
-        name: 'Yiorgos Avraamu',
-        new: true,
-        registered: 'Jan 1, 2023',
-      },
-      country: { name: 'USA', flag: cifUs },
-      usage: {
-        value: 50,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'success',
-      },
-      payment: { name: 'Mastercard', icon: cibCcMastercard },
-      activity: '10 sec ago',
-    },
-    {
-      avatar: { src: avatar2, status: 'danger' },
-      user: {
-        name: 'Avram Tarasios',
-        new: false,
-        registered: 'Jan 1, 2023',
-      },
-      country: { name: 'Brazil', flag: cifBr },
-      usage: {
-        value: 22,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'info',
-      },
-      payment: { name: 'Visa', icon: cibCcVisa },
-      activity: '5 minutes ago',
-    },
-    {
-      avatar: { src: avatar3, status: 'warning' },
-      user: { name: 'Quintin Ed', new: true, registered: 'Jan 1, 2023' },
-      country: { name: 'India', flag: cifIn },
-      usage: {
-        value: 74,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'warning',
-      },
-      payment: { name: 'Stripe', icon: cibCcStripe },
-      activity: '1 hour ago',
-    },
-    {
-      avatar: { src: avatar4, status: 'secondary' },
-      user: { name: 'Enéas Kwadwo', new: true, registered: 'Jan 1, 2023' },
-      country: { name: 'France', flag: cifFr },
-      usage: {
-        value: 98,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'danger',
-      },
-      payment: { name: 'PayPal', icon: cibCcPaypal },
-      activity: 'Last month',
-    },
-    {
-      avatar: { src: avatar5, status: 'success' },
-      user: {
-        name: 'Agapetus Tadeáš',
-        new: true,
-        registered: 'Jan 1, 2023',
-      },
-      country: { name: 'Spain', flag: cifEs },
-      usage: {
-        value: 22,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'primary',
-      },
-      payment: { name: 'Google Wallet', icon: cibCcApplePay },
-      activity: 'Last week',
-    },
-    {
-      avatar: { src: avatar6, status: 'danger' },
-      user: {
-        name: 'Friderik Dávid',
-        new: true,
-        registered: 'Jan 1, 2023',
-      },
-      country: { name: 'Poland', flag: cifPl },
-      usage: {
-        value: 43,
-        period: 'Jun 11, 2023 - Jul 10, 2023',
-        color: 'success',
-      },
-      payment: { name: 'Amex', icon: cibCcAmex },
-      activity: 'Last week',
-    },
-  ]
+  // Example data for recent activities
+  const recentActivities = [
+    { id: 1, type: 'appointment', message: 'Appointment scheduled for "Max"', time: '2 hours ago', status: 'success' },
+    { id: 2, type: 'medical', message: 'Medical record updated', time: 'Yesterday', status: 'info' },
+    { id: 3, type: 'reminder', message: 'Reminder: Pending vaccination', time: '3 days ago', status: 'warning' },
+    { id: 4, type: 'system', message: 'Welcome to the veterinary system', time: '1 week ago', status: 'primary' },
+  ];
+
+  // Quick actions based on role
+  const quickActions = {
+    Administrator: [
+      { icon: cilUser, label: 'Manage Users', path: '/users', color: 'primary' },
+      { icon: cilPaw, label: 'View All Pets', path: '/pets/list', color: 'success' },
+      { icon: cilCalendar, label: 'Appointment Calendar', path: '/appointments', color: 'info' },
+      { icon: cilClipboard, label: 'Reports', path: '/reports', color: 'warning' },
+    ],
+    Veterinarian: [
+      { icon: cilMedicalCross, label: "Today's Consultations", path: '/appointments', color: 'primary' },
+      { icon: cilClipboard, label: 'Medical Records', path: '/medical-records', color: 'success' },
+      { icon: cilBell, label: 'Notifications', path: '/notifications', color: 'info' },
+      { icon: cilInbox, label: 'Messages', path: '/messages', color: 'warning' },
+    ],
+    Client: [
+      { icon: cilPaw, label: 'My Pets', path: '/pets/mypets', color: 'primary' },
+      { icon: cilCalendar, label: 'My Appointments', path: '/appointments', color: 'success' },
+      { icon: cilHeart, label: 'Medical History', path: '/medical-history', color: 'info' },
+      { icon: cilBell, label: 'Notifications', path: '/notifications', color: 'warning' },
+    ],
+  };
+
+  // Pet health statistics (example)
+  const petHealthStats = [
+    { status: 'Healthy', count: 32, percentage: 65, color: 'success' },
+    { status: 'Under Observation', count: 12, percentage: 25, color: 'warning' },
+    { status: 'Needs Attention', count: 5, percentage: 10, color: 'danger' },
+  ];
+
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-2">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const userRole = userInfo?.role || 'Client';
+  const userDisplayName = userInfo?.usuario || 'User';
+  const userEmail = userInfo?.correo || '';
 
   return (
-    <>
-      <WidgetsDropdown className="mb-4" />
-      <CCard className="mb-4">
+    <div className="dashboard-container">
+      {/* Welcome header */}
+      <CCard className="mb-4 welcome-card">
         <CCardBody>
-          <CRow>
-            <CCol sm={5}>
-              <h4 id="traffic" className="card-title mb-0">
-                Traffic
-              </h4>
-              <div className="small text-body-secondary">January - July 2023</div>
+          <CRow className="align-items-center">
+            <CCol md={8}>
+              <h1 className="dashboard-title mb-2">
+                <CIcon icon={cilShieldAlt} className="me-2" />
+                Welcome, {userDisplayName}!
+              </h1>
+              <p className="dashboard-subtitle text-muted mb-0">
+                {userRole} • {userEmail}
+              </p>
+              <p className="dashboard-description mt-2">
+                Veterinary Management System - Everything you need for your pets' care in one place.
+              </p>
             </CCol>
-            <CCol sm={7} className="d-none d-md-block">
-              <CButton color="primary" className="float-end">
-                <CIcon icon={cilCloudDownload} />
-              </CButton>
-              <CButtonGroup className="float-end me-3">
-                {['Day', 'Month', 'Year'].map((value) => (
-                  <CButton
-                    color="outline-secondary"
-                    key={value}
-                    className="mx-0"
-                    active={value === 'Month'}
-                  >
-                    {value}
-                  </CButton>
-                ))}
-              </CButtonGroup>
+            <CCol md={4} className="text-end">
+              <div className="role-badge">
+                <span className={`badge bg-${getRoleColor(userRole)}`}>
+                  {userRole}
+                </span>
+              </div>
+              <p className="small text-muted mt-2">
+                Last access: Today {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
             </CCol>
           </CRow>
-          <MainChart />
         </CCardBody>
-        <CCardFooter>
-          <CRow
-            xs={{ cols: 1, gutter: 4 }}
-            sm={{ cols: 2 }}
-            lg={{ cols: 4 }}
-            xl={{ cols: 5 }}
-            className="mb-2 text-center"
-          >
-            {progressExample.map((item, index, items) => (
-              <CCol
-                className={classNames({
-                  'd-none d-xl-block': index + 1 === items.length,
-                })}
-                key={index}
-              >
-                <div className="text-body-secondary">{item.title}</div>
-                <div className="fw-semibold text-truncate">
-                  {item.value} ({item.percent}%)
-                </div>
-                <CProgress thin className="mt-2" color={item.color} value={item.percent} />
-              </CCol>
-            ))}
-          </CRow>
-        </CCardFooter>
       </CCard>
-      <WidgetsBrand className="mb-4" withCharts />
-      <CRow>
-        <CCol xs>
-          <CCard className="mb-4">
-            <CCardHeader>Traffic {' & '} Sales</CCardHeader>
-            <CCardBody>
-              <CRow>
-                <CCol xs={12} md={6} xl={6}>
-                  <CRow>
-                    <CCol xs={6}>
-                      <div className="border-start border-start-4 border-start-info py-1 px-3">
-                        <div className="text-body-secondary text-truncate small">New Clients</div>
-                        <div className="fs-5 fw-semibold">9,123</div>
-                      </div>
-                    </CCol>
-                    <CCol xs={6}>
-                      <div className="border-start border-start-4 border-start-danger py-1 px-3 mb-3">
-                        <div className="text-body-secondary text-truncate small">
-                          Recurring Clients
-                        </div>
-                        <div className="fs-5 fw-semibold">22,643</div>
-                      </div>
-                    </CCol>
-                  </CRow>
-                  <hr className="mt-0" />
-                  {progressGroupExample1.map((item, index) => (
-                    <div className="progress-group mb-4" key={index}>
-                      <div className="progress-group-prepend">
-                        <span className="text-body-secondary small">{item.title}</span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <CProgress thin color="info" value={item.value1} />
-                        <CProgress thin color="danger" value={item.value2} />
-                      </div>
-                    </div>
-                  ))}
-                </CCol>
-                <CCol xs={12} md={6} xl={6}>
-                  <CRow>
-                    <CCol xs={6}>
-                      <div className="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
-                        <div className="text-body-secondary text-truncate small">Pageviews</div>
-                        <div className="fs-5 fw-semibold">78,623</div>
-                      </div>
-                    </CCol>
-                    <CCol xs={6}>
-                      <div className="border-start border-start-4 border-start-success py-1 px-3 mb-3">
-                        <div className="text-body-secondary text-truncate small">Organic</div>
-                        <div className="fs-5 fw-semibold">49,123</div>
-                      </div>
-                    </CCol>
-                  </CRow>
 
-                  <hr className="mt-0" />
+      {/* Statistics cards */}
+      <CRow className="mb-4">
+        <CCol xs={12} sm={6} xl={3} className="mb-4">
+          <CCard className="stats-card">
+            <CCardBody className="text-center">
+              <div className="stats-icon-container">
+                <CIcon icon={cilPaw} className="stats-icon" />
+              </div>
+              <h3 className="stats-value mt-3">{stats.totalPets}</h3>
+              <p className="stats-label">Pets</p>
+              <p className="stats-description small text-muted">
+                {userRole === 'Client' ? 'Your registered pets' : 'Total pets in the system'}
+              </p>
+            </CCardBody>
+          </CCard>
+        </CCol>
 
-                  {progressGroupExample2.map((item, index) => (
-                    <div className="progress-group mb-4" key={index}>
-                      <div className="progress-group-header">
-                        <CIcon className="me-2" icon={item.icon} size="lg" />
-                        <span>{item.title}</span>
-                        <span className="ms-auto fw-semibold">{item.value}%</span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <CProgress thin color="warning" value={item.value} />
-                      </div>
-                    </div>
-                  ))}
+        <CCol xs={12} sm={6} xl={3} className="mb-4">
+          <CCard className="stats-card">
+            <CCardBody className="text-center">
+              <div className="stats-icon-container">
+                <CIcon icon={cilCalendar} className="stats-icon" />
+              </div>
+              <h3 className="stats-value mt-3">{stats.upcomingAppointments}</h3>
+              <p className="stats-label">Upcoming Appointments</p>
+              <p className="stats-description small text-muted">
+                {userRole === 'Client' ? 'Your scheduled appointments' : 'Appointments to attend'}
+              </p>
+            </CCardBody>
+          </CCard>
+        </CCol>
 
-                  <div className="mb-5"></div>
+        <CCol xs={12} sm={6} xl={3} className="mb-4">
+          <CCard className="stats-card">
+            <CCardBody className="text-center">
+              <div className="stats-icon-container">
+                <CIcon icon={cilClipboard} className="stats-icon" />
+              </div>
+              <h3 className="stats-value mt-3">{stats.pendingTasks}</h3>
+              <p className="stats-label">Pending Tasks</p>
+              <p className="stats-description small text-muted">
+                {userRole === 'Client' ? 'Your pending tasks' : 'Tasks to complete'}
+              </p>
+            </CCardBody>
+          </CCard>
+        </CCol>
 
-                  {progressGroupExample3.map((item, index) => (
-                    <div className="progress-group" key={index}>
-                      <div className="progress-group-header">
-                        <CIcon className="me-2" icon={item.icon} size="lg" />
-                        <span>{item.title}</span>
-                        <span className="ms-auto fw-semibold">
-                          {item.value}{' '}
-                          <span className="text-body-secondary small">({item.percent}%)</span>
-                        </span>
-                      </div>
-                      <div className="progress-group-bars">
-                        <CProgress thin color="success" value={item.percent} />
-                      </div>
-                    </div>
-                  ))}
-                </CCol>
-              </CRow>
-
-              <br />
-
-              <CTable align="middle" className="mb-0 border" hover responsive>
-                <CTableHead className="text-nowrap">
-                  <CTableRow>
-                    <CTableHeaderCell className="bg-body-tertiary text-center">
-                      <CIcon icon={cilPeople} />
-                    </CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary">User</CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary text-center">
-                      Country
-                    </CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary">Usage</CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary text-center">
-                      Payment Method
-                    </CTableHeaderCell>
-                    <CTableHeaderCell className="bg-body-tertiary">Activity</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                  {tableExample.map((item, index) => (
-                    <CTableRow v-for="item in tableItems" key={index}>
-                      <CTableDataCell className="text-center">
-                        <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div>{item.user.name}</div>
-                        <div className="small text-body-secondary text-nowrap">
-                          <span>{item.user.new ? 'New' : 'Recurring'}</span> | Registered:{' '}
-                          {item.user.registered}
-                        </div>
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        <CIcon size="xl" icon={item.country.flag} title={item.country.name} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div className="d-flex justify-content-between text-nowrap">
-                          <div className="fw-semibold">{item.usage.value}%</div>
-                          <div className="ms-3">
-                            <small className="text-body-secondary">{item.usage.period}</small>
-                          </div>
-                        </div>
-                        <CProgress thin color={item.usage.color} value={item.usage.value} />
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        <CIcon size="xl" icon={item.payment.icon} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div className="small text-body-secondary text-nowrap">Last login</div>
-                        <div className="fw-semibold text-nowrap">{item.activity}</div>
-                      </CTableDataCell>
-                    </CTableRow>
-                  ))}
-                </CTableBody>
-              </CTable>
+        <CCol xs={12} sm={6} xl={3} className="mb-4">
+          <CCard className="stats-card">
+            <CCardBody className="text-center">
+              <div className="stats-icon-container">
+                <CIcon icon={cilChartLine} className="stats-icon" />
+              </div>
+              <h3 className="stats-value mt-3">{stats.recentActivity}</h3>
+              <p className="stats-label">Recent Activity</p>
+              <p className="stats-description small text-muted">
+                Activities in the last 7 days
+              </p>
             </CCardBody>
           </CCard>
         </CCol>
       </CRow>
-    </>
-  )
-}
 
-export default Dashboard
+      <CRow>
+        {/* Quick Actions */}
+        <CCol lg={6} className="mb-4">
+          <CCard className="h-100">
+            <CCardHeader>
+              <h5 className="mb-0">
+                <CIcon icon={cilClock} className="me-2" />
+                Quick Actions
+              </h5>
+            </CCardHeader>
+            <CCardBody>
+              <CRow>
+                {quickActions[userRole]?.map((action, index) => (
+                  <CCol xs={6} className="mb-3" key={index}>
+                    <CButton 
+                      href={action.path}
+                      color={action.color}
+                      className="w-100 h-100 quick-action-btn"
+                      style={{ 
+                        minHeight: '100px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <CIcon icon={action.icon} size="xl" className="mb-2" />
+                      <span className="small">{action.label}</span>
+                    </CButton>
+                  </CCol>
+                ))}
+              </CRow>
+            </CCardBody>
+          </CCard>
+        </CCol>
+
+        {/* Pet Health Status */}
+        <CCol lg={6} className="mb-4">
+          <CCard className="h-100">
+            <CCardHeader>
+              <h5 className="mb-0">
+                <CIcon icon={cilHeart} className="me-2" />
+                Pet Health Status
+              </h5>
+            </CCardHeader>
+            <CCardBody>
+              {petHealthStats.map((stat, index) => (
+                <div key={index} className="mb-3">
+                  <div className="d-flex justify-content-between mb-1">
+                    <span className="small">{stat.status}</span>
+                    <span className="small fw-semibold">
+                      {stat.count} ({stat.percentage}%)
+                    </span>
+                  </div>
+                  <CProgress className="mb-3">
+                    <CProgressBar color={stat.color} value={stat.percentage} />
+                  </CProgress>
+                </div>
+              ))}
+              
+              {userRole === 'Client' && stats.totalPets === 0 && (
+                <CAlert color="info" className="mt-3">
+                  <CIcon icon={cilPaw} className="me-2" />
+                  You don't have any registered pets yet. 
+                  <CButton color="link" href="/pets/register" className="p-0 ms-1">
+                    Register your first pet!
+                  </CButton>
+                </CAlert>
+              )}
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
+
+      <CRow>
+        {/* Recent Activity */}
+        <CCol lg={12} className="mb-4">
+          <CCard>
+            <CCardHeader>
+              <h5 className="mb-0">
+                <CIcon icon={cilBell} className="me-2" />
+                Recent Activity
+              </h5>
+            </CCardHeader>
+            <CCardBody>
+              <CListGroup>
+                {recentActivities.map((activity) => (
+                  <CListGroupItem key={activity.id} className="d-flex justify-content-between align-items-center">
+                    <div className="d-flex align-items-center">
+                      <CIcon 
+                        icon={getActivityIcon(activity.type)} 
+                        className={`me-3 text-${activity.status}`} 
+                      />
+                      <div>
+                        <div className="fw-semibold">{activity.message}</div>
+                        <small className="text-muted">{activity.time}</small>
+                      </div>
+                    </div>
+                    <span className={`badge bg-${activity.status}`}>
+                      {getActivityStatusText(activity.type)}
+                    </span>
+                  </CListGroupItem>
+                ))}
+              </CListGroup>
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
+
+      {/* Important Reminders */}
+      {userRole === 'Client' && (
+        <CRow>
+          <CCol lg={12}>
+            <CCard>
+              <CCardHeader>
+                <h5 className="mb-0">
+                  <CIcon icon={cilWarning} className="me-2" />
+                  Important Reminders
+                </h5>
+              </CCardHeader>
+              <CCardBody>
+                <CRow>
+                  <CCol md={4}>
+                    <CAlert color="warning">
+                      <CIcon icon={cilMedicalCross} className="me-2" />
+                      <strong>Vaccinations</strong>
+                      <p className="mb-0 small">Check your pets' vaccination schedule.</p>
+                    </CAlert>
+                  </CCol>
+                  <CCol md={4}>
+                    <CAlert color="info">
+                      <CIcon icon={cilCalendar} className="me-2" />
+                      <strong>Upcoming Appointments</strong>
+                      <p className="mb-0 small">Review and confirm your scheduled appointments.</p>
+                    </CAlert>
+                  </CCol>
+                  <CCol md={4}>
+                    <CAlert color="success">
+                      <CIcon icon={cilCheckCircle} className="me-2" />
+                      <strong>Updated History</strong>
+                      <p className="mb-0 small">Keep your pets' medical history updated.</p>
+                    </CAlert>
+                  </CCol>
+                </CRow>
+              </CCardBody>
+            </CCard>
+          </CCol>
+        </CRow>
+      )}
+
+      {/* Tips and Suggestions */}
+      <CCard className="mt-4">
+        <CCardBody className="text-center">
+          <CIcon icon={cilStar} className="text-warning mb-2" size="xl" />
+          <h5 className="mb-2">Need Help?</h5>
+          <p className="text-muted mb-3">
+            Explore the different sections of the system or contact support if you have any questions.
+          </p>
+          <div className="d-flex justify-content-center gap-2">
+            <CButton color="primary" href="/help">
+              Help Center
+            </CButton>
+            <CButton color="outline-primary" href="/contact">
+              Contact Support
+            </CButton>
+          </div>
+        </CCardBody>
+      </CCard>
+    </div>
+  );
+};
+
+// Helper functions
+const getRoleColor = (role) => {
+  switch(role) {
+    case 'Administrator': return 'danger';
+    case 'Veterinarian': return 'warning';
+    case 'Client': return 'primary';
+    default: return 'secondary';
+  }
+};
+
+const getActivityIcon = (type) => {
+  switch(type) {
+    case 'appointment': return cilCalendar;
+    case 'medical': return cilMedicalCross;
+    case 'reminder': return cilBell;
+    case 'system': return cilShieldAlt;
+    default: return cilCheckCircle;
+  }
+};
+
+const getActivityStatusText = (type) => {
+  switch(type) {
+    case 'appointment': return 'Appointment';
+    case 'medical': return 'Medical';
+    case 'reminder': return 'Reminder';
+    case 'system': return 'System';
+    default: return 'General';
+  }
+};
+
+export default Dashboard;
