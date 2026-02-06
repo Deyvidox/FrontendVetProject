@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // URL de tu servidor Express real
-const API_URL = 'https://vetproyectbackend.onrender.com./appointments'; 
+const API_URL = 'https://vetproyectbackend.onrender.com/appointments'; 
 
 export const appointmentService = {
   getAll: async () => {

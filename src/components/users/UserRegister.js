@@ -61,7 +61,7 @@ const UserRegister = ({ show, onClose, onSubmit }) => {
 
   const loadRoles = async () => {
     try {
-      const response = await axios.get('https://vetproyectbackend.onrender.com./roles')
+      const response = await axios.get('https://vetproyectbackend.onrender.com/roles')
       if (response.data.type === "Successfully") {
         setRoles(response.data.message.roles || [])
       }
@@ -231,7 +231,7 @@ const UserRegister = ({ show, onClose, onSubmit }) => {
         }, 2000)
       } else {
         // O enviar directamente al backend
-        const response = await axios.post('https://vetproyectbackend.onrender.com./users/register', payload)
+        const response = await axios.post('https://vetproyectbackend.onrender.com/users/register', payload)
         
         if (response.data.type === "Successfully") {
           setAlert({

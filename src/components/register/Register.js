@@ -163,7 +163,7 @@ const Register = () => {
     }
 
     try {
-      const response = await axios.post("https://vetproyectbackend.onrender.com./register", {
+      const response = await axios.post("https://vetproyectbackend.onrender.com/register", {
         first_name: formData.first_name,
         last_name: formData.last_name,
         identification_number: formData.identification_number || null,

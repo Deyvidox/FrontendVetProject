@@ -99,7 +99,7 @@ const UserList = ({ users, onUserUpdate, onUserDelete, onUserAdd, onSearch }) =>
   const handleViewDetails = async (userId) => {
     try {
       setLoading(true);
-      const response = await axios.get(`https://vetproyectbackend.onrender.com./users/search/${userId}`);
+      const response = await axios.get(`https://vetproyectbackend.onrender.com/users/search/${userId}`);
       
       if (response.data.type === "Successfully") {
         const user = response.data.message.user;
