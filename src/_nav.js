@@ -57,21 +57,7 @@ const _nav = [
       },
     ],
   },
-  {
-
-    component:CNavItem,
-        name:'Appointment',
-        to:'/appointments',
-        icon:<CIcon icon={cilNotes} customClassName="nav-icon" />,
-  }, 
-
-    {component:CNavItem,
-        name:'Inventory',
-        to:'/Inventory',
-        icon:<CIcon icon={cilCalculator} customClassName="nav-icon" />,
-    },
-
-  {
+    {
   component: CNavGroup,
   name: 'Pets',
   icon: <CIcon icon={cilHeart} customClassName="nav-icon" />,
@@ -97,6 +83,19 @@ const _nav = [
     },
   ],
 },
+  {
+
+    component:CNavItem,
+        name:'Appointment',
+        to:'/appointments',
+        icon:<CIcon icon={cilNotes} customClassName="nav-icon" />,
+  }, 
+
+    {component:CNavItem,
+        name:'Inventory',
+        to:'/Inventory',
+        icon:<CIcon icon={cilCalculator} customClassName="nav-icon" />,
+    },
 ]
 
 export default _nav

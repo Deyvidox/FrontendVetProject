@@ -10,52 +10,68 @@ import {
   CInputGroup,
   CInputGroupText,
   CRow,
-  CCol
+  CCol,
+  CModal,
+  CModalHeader,
+  CModalBody,
+  CModalFooter
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilLockLocked, cilUser, cilCalendar, cilEnvelopeClosed, cilPhone } from '@coreui/icons'
+import { cilLockLocked, cilUser, cilCalendar, cilEnvelopeClosed, cilPhone, cilAddressBook } from '@coreui/icons'
 import '../../css/register/Register.css'
+import axios from 'axios'
 
 const Register = () => {
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
-    nombres: '',
-    apellidos: '',
-    fecha_nacimiento: '',
-    telefono: '',
-    direccion: '',
-    usuario: '',
-    correo: '',
-    contrasena: '',
-    repetirContrasena: '',
+    first_name: '',
+    last_name: '',
+    date_of_birth: '',
+    phone: '',
+    address: '',
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    identification_number: ''
   })
 
   const [errors, setErrors] = useState({})
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [modal, setModal] = useState(false)
+  const [modalTitle, setModalTitle] = useState('')
+  const [modalMessage, setModalMessage] = useState('')
+  const [modalType, setModalType] = useState('') // 'success', 'error', 'warning'
 
   const regex = useMemo(() => ({
-    nombre: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,100}$/,
-    usuario: /^[A-Za-z0-9._-]{4,50}$/,
+    name: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,100}$/,
+    username: /^[A-Za-z0-9._-]{4,50}$/,
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    telefono: /^[0-9+\-\s()]{7,11}$/,
-    passwordFuerte: /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
+    phone: /^[0-9+\-\s()]{7,20}$/,
+    passwordStrong: /^(?=.*[A-Za-z])(?=.*\d).{8,}$/,
+    identification: /^[VEJvej0-9\-]{5,20}$/
   }), [])
 
   const validarCampo = (name, value) => {
     switch (name) {
-      case 'nombres':
-        if (!value) return 'Los nombres son obligatorios.'
-        if (!regex.nombre.test(value)) return 'Solo letras y espacios (2–100).'
+      case 'first_name':
+        if (!value) return 'El nombre es obligatorio.'
+        if (!regex.name.test(value)) return 'Solo letras y espacios (2–100).'
         return ''
 
-      case 'apellidos':
-        if (!value) return 'Los apellidos son obligatorios.'
-        if (!regex.nombre.test(value)) return 'Solo letras y espacios (2–100).'
+      case 'last_name':
+        if (!value) return 'El apellido es obligatorio.'
+        if (!regex.name.test(value)) return 'Solo letras y espacios (2–100).'
         return ''
 
-      case 'fecha_nacimiento':
+      case 'identification_number':
+        if (!value) return ''
+        if (!regex.identification.test(value)) return 'Formato de identificación inválido.'
+        return ''
+
+      case 'date_of_birth':
         if (!value) return 'La fecha de nacimiento es obligatoria.'
         const fecha = new Date(value)
         const hoy = new Date()
@@ -68,34 +84,35 @@ const Register = () => {
         if (edadReal > 90) return 'La edad no puede superar los 90 años.'
         return ''
 
-      case 'telefono':
+      case 'phone':
         if (!value) return ''
-        if (!regex.telefono.test(value)) return 'Formato de teléfono inválido.'
+        if (!regex.phone.test(value)) return 'Formato de teléfono inválido.'
         return ''
 
-      case 'direccion':
+      case 'address':
         if (!value) return ''
-        if (value.trim().length < 5) return 'Dirección demasiado corta.'
+        if (value.trim().length < 5) return 'Dirección demasiado corta (mínimo 5 caracteres).'
+        if (value.trim().length > 500) return 'Dirección demasiado larga (máximo 500 caracteres).'
         return ''
 
-      case 'usuario':
+      case 'username':
         if (!value) return 'El usuario es obligatorio.'
-        if (!regex.usuario.test(value)) return '4–50 caracteres. Letras, números ".", "_", "-".'
+        if (!regex.username.test(value)) return '4–50 caracteres. Letras, números ".", "_", "-".'
         return ''
 
-      case 'correo':
+      case 'email':
         if (!value) return 'El correo es obligatorio.'
         if (!regex.email.test(value)) return 'Correo inválido.'
         return ''
 
-      case 'contrasena':
+      case 'password':
         if (!value) return 'La contraseña es obligatoria.'
-        if (!regex.passwordFuerte.test(value)) return 'Mínimo 8 caracteres, letras y números.'
+        if (!regex.passwordStrong.test(value)) return 'Mínimo 8 caracteres, al menos una letra y un número.'
         return ''
 
-      case 'repetirContrasena':
-        if (!value) return 'Repite la contraseña.'
-        if (value !== formData.contrasena) return 'Las contraseñas no coinciden.'
+      case 'confirmPassword':
+        if (!value) return 'Confirma la contraseña.'
+        if (value !== formData.password) return 'Las contraseñas no coinciden.'
         return ''
 
       default:
@@ -111,11 +128,28 @@ const Register = () => {
 
   const validarFormularioCompleto = () => {
     const nuevosErrores = {}
-    Object.keys(formData).forEach(campo => {
+    const camposObligatorios = ['first_name', 'last_name', 'date_of_birth', 'username', 'email', 'password', 'confirmPassword']
+    
+    camposObligatorios.forEach(campo => {
       nuevosErrores[campo] = validarCampo(campo, formData[campo])
     })
+    
+    // Validar campos opcionales si tienen valor
+    ['identification_number', 'phone', 'address'].forEach(campo => {
+      if (formData[campo]) {
+        nuevosErrores[campo] = validarCampo(campo, formData[campo])
+      }
+    })
+    
     setErrors(nuevosErrores)
-    return Object.values(nuevosErrores).every(msg => msg === '')
+    return Object.values(nuevosErrores).every(msg => !msg || msg === '')
+  }
+
+  const showModal = (title, message, type = 'info') => {
+    setModalTitle(title)
+    setModalMessage(message)
+    setModalType(type)
+    setModal(true)
   }
 
   const handleRegister = async (e) => {
@@ -124,158 +158,299 @@ const Register = () => {
 
     if (!validarFormularioCompleto()) {
       setLoading(false)
+      showModal('Error de validación', 'Por favor, corrige los errores en el formulario.', 'error')
       return
     }
 
-    const payload = {
-      nombre: `${formData.nombres} ${formData.apellidos}`,
-      correo: formData.correo,
-      usuario: formData.usuario,
-      telefono: formData.telefono,
-      fecha_nacimiento: formData.fecha_nacimiento,
-      direccion: formData.direccion,
-      contrasena: formData.contrasena
-    }
-
     try {
-      // Aquí irá la conexión a tu backend
-      // Ejemplo: await fetch('tu-backend-url/api/auth/register', {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(payload)
-      // });
+      const response = await axios.post("http://localhost:4000/register", {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        identification_number: formData.identification_number || null,
+        date_of_birth: formData.date_of_birth,
+        phone: formData.phone || null,
+        address: formData.address || null,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      })
 
-      alert("Registro exitoso. Ahora puedes iniciar sesión.")
-
-      navigate('/login', { state: { usuario: formData.usuario, correo: formData.correo } })
+      const { data } = response
+      
+      if (data.type === "Successfully") {
+        showModal('¡Registro exitoso!', data.message.text, 'success')
+        
+        // Limpiar formulario después de registro exitoso
+        setFormData({
+          first_name: '',
+          last_name: '',
+          date_of_birth: '',
+          phone: '',
+          address: '',
+          username: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          identification_number: ''
+        })
+        
+        // Redirigir después de 2 segundos
+        setTimeout(() => {
+          navigate('/login', { 
+            state: { 
+              username: formData.username,
+              email: formData.email 
+            } 
+          })
+        }, 2000)
+        
+      } else {
+        showModal(data.type, data.message, 'error')
+      }
 
     } catch (error) {
-      alert("Error al registrarse.")
+      console.error('Error en registro:', error)
+      
+      let errorMessage = 'Error al registrar usuario'
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.response?.data?.type === "Conflict") {
+        errorMessage = error.response.data.message
+      }
+      
+      showModal('Error', errorMessage, 'error')
+      
     } finally {
       setLoading(false)
     }
   }
 
   const renderError = campo =>
-    errors[campo] ? <small className="text-danger">{errors[campo]}</small> : null
+    errors[campo] ? <small className="text-danger d-block mt-1">{errors[campo]}</small> : null
 
   return (
-    <div className="auth-wrapper">
-      <CContainer>
-        <CRow className="justify-content-center">
-          <CCol lg={10} xl={9}>
-            <CCard className="auth-card">
+    <>
+      <CModal 
+        visible={modal} 
+        onClose={() => setModal(false)}
+        color={modalType === 'success' ? 'success' : modalType === 'error' ? 'danger' : 'primary'}
+      >
+        <CModalHeader>{modalTitle}</CModalHeader>
+        <CModalBody>{modalMessage}</CModalBody>
+        <CModalFooter>
+          <CButton color="primary" onClick={() => setModal(false)}>
+            Aceptar
+          </CButton>
+        </CModalFooter>
+      </CModal>
 
-              <CCardBody className="auth-card-inner">
-                <CForm className="auth-form" onSubmit={handleRegister} noValidate>
+      <div className="auth-wrapper">
+        <CContainer>
+          <CRow className="justify-content-center">
+            <CCol lg={10} xl={9}>
+              <CCard className="auth-card">
 
-                  <div className="auth-header">
-                    <h1>Registro</h1>
-                    <p>Crea tu cuenta</p>
-                  </div>
+                <CCardBody className="auth-card-inner">
+                  <CForm className="auth-form" onSubmit={handleRegister} noValidate>
 
-                  <CInputGroup className="mb-2">
-                    <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
-                    <CFormInput name="nombres" placeholder="Nombres"
-                      value={formData.nombres} onChange={handleChange} disabled={loading} />
-                  </CInputGroup>
-                  {renderError('nombres')}
+                    <div className="auth-header">
+                      <h1>Registro de Cliente</h1>
+                      <p>Crea tu cuenta para acceder a nuestros servicios</p>
+                    </div>
 
-                  <CInputGroup className="mb-2">
-                    <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
-                    <CFormInput name="apellidos" placeholder="Apellidos"
-                      value={formData.apellidos} onChange={handleChange} disabled={loading} />
-                  </CInputGroup>
-                  {renderError('apellidos')}
+                    <CRow>
+                      <CCol md={6}>
+                        <CInputGroup className="mb-3">
+                          <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
+                          <CFormInput 
+                            name="first_name" 
+                            placeholder="Nombre(s)"
+                            value={formData.first_name} 
+                            onChange={handleChange} 
+                            disabled={loading}
+                          />
+                        </CInputGroup>
+                        {renderError('first_name')}
+                      </CCol>
 
-                  <CInputGroup className="mb-2">
-                    <CInputGroupText><CIcon icon={cilCalendar} /></CInputGroupText>
-                    <CFormInput type="date" name="fecha_nacimiento"
-                      value={formData.fecha_nacimiento} onChange={handleChange} disabled={loading} />
-                  </CInputGroup>
-                  {renderError('fecha_nacimiento')}
+                      <CCol md={6}>
+                        <CInputGroup className="mb-3">
+                          <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
+                          <CFormInput 
+                            name="last_name" 
+                            placeholder="Apellido(s)"
+                            value={formData.last_name} 
+                            onChange={handleChange} 
+                            disabled={loading}
+                          />
+                        </CInputGroup>
+                        {renderError('last_name')}
+                      </CCol>
+                    </CRow>
 
-                  <CInputGroup className="mb-2">
-                    <CInputGroupText><CIcon icon={cilPhone} /></CInputGroupText>
-                    <CFormInput name="telefono" placeholder="Teléfono"
-                      value={formData.telefono} onChange={handleChange} disabled={loading} />
-                  </CInputGroup>
-                  {renderError('telefono')}
+                    <CInputGroup className="mb-3">
+                      <CInputGroupText><CIcon icon={cilAddressBook} /></CInputGroupText>
+                      <CFormInput 
+                        name="identification_number" 
+                        placeholder="Número de identificación (opcional)"
+                        value={formData.identification_number} 
+                        onChange={handleChange} 
+                        disabled={loading}
+                      />
+                    </CInputGroup>
+                    {renderError('identification_number')}
 
-                  <CInputGroup className="mb-2">
-                    <CInputGroupText><CIcon icon={cilEnvelopeClosed} /></CInputGroupText>
-                    <CFormInput name="direccion" placeholder="Dirección"
-                      value={formData.direccion} onChange={handleChange} disabled={loading} />
-                  </CInputGroup>
-                  {renderError('direccion')}
+                    <CInputGroup className="mb-3">
+                      <CInputGroupText><CIcon icon={cilCalendar} /></CInputGroupText>
+                      <CFormInput 
+                        type="date" 
+                        name="date_of_birth"
+                        value={formData.date_of_birth} 
+                        onChange={handleChange} 
+                        disabled={loading}
+                      />
+                    </CInputGroup>
+                    {renderError('date_of_birth')}
 
-                  <CInputGroup className="mb-2">
-                    <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
-                    <CFormInput name="usuario" placeholder="Usuario"
-                      value={formData.usuario} onChange={handleChange} disabled={loading} />
-                  </CInputGroup>
-                  {renderError('usuario')}
+                    <CInputGroup className="mb-3">
+                      <CInputGroupText><CIcon icon={cilPhone} /></CInputGroupText>
+                      <CFormInput 
+                        name="phone" 
+                        placeholder="Teléfono (opcional)"
+                        value={formData.phone} 
+                        onChange={handleChange} 
+                        disabled={loading}
+                      />
+                    </CInputGroup>
+                    {renderError('phone')}
 
-                  <CInputGroup className="mb-2">
-                    <CInputGroupText><CIcon icon={cilEnvelopeClosed} /></CInputGroupText>
-                    <CFormInput name="correo" placeholder="Correo"
-                      value={formData.correo} onChange={handleChange} disabled={loading} />
-                  </CInputGroup>
-                  {renderError('correo')}
+                    <CInputGroup className="mb-3">
+                      <CInputGroupText><CIcon icon={cilAddressBook} /></CInputGroupText>
+                      <CFormInput 
+                        name="address" 
+                        placeholder="Dirección (opcional)"
+                        value={formData.address} 
+                        onChange={handleChange} 
+                        disabled={loading}
+                      />
+                    </CInputGroup>
+                    {renderError('address')}
 
-                  <CInputGroup className="mb-2 password-wrapper">
-                    <CInputGroupText><CIcon icon={cilLockLocked} /></CInputGroupText>
-                    <CFormInput
-                      type={showPassword ? 'text' : 'password'}
-                      name="contrasena"
-                      placeholder="Contraseña"
-                      value={formData.contrasena}
-                      onChange={handleChange}
+                    <CInputGroup className="mb-3">
+                      <CInputGroupText><CIcon icon={cilUser} /></CInputGroupText>
+                      <CFormInput 
+                        name="username" 
+                        placeholder="Nombre de usuario"
+                        value={formData.username} 
+                        onChange={handleChange} 
+                        disabled={loading}
+                      />
+                    </CInputGroup>
+                    {renderError('username')}
+
+                    <CInputGroup className="mb-3">
+                      <CInputGroupText><CIcon icon={cilEnvelopeClosed} /></CInputGroupText>
+                      <CFormInput 
+                        name="email" 
+                        type="email"
+                        placeholder="Correo electrónico"
+                        value={formData.email} 
+                        onChange={handleChange} 
+                        disabled={loading}
+                      />
+                    </CInputGroup>
+                    {renderError('email')}
+
+                    <CInputGroup className="mb-3 password-wrapper">
+                      <CInputGroupText><CIcon icon={cilLockLocked} /></CInputGroupText>
+                      <CFormInput
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        placeholder="Contraseña"
+                        value={formData.password}
+                        onChange={handleChange}
+                        disabled={loading}
+                      />
+                      <button 
+                        type="button" 
+                        className="btn-ver-password"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={loading}
+                      >
+                        {showPassword ? '👁️‍🗨️' : '👁️'}
+                      </button>
+                    </CInputGroup>
+                    {renderError('password')}
+
+                    <CInputGroup className="mb-4 password-wrapper">
+                      <CInputGroupText><CIcon icon={cilLockLocked} /></CInputGroupText>
+                      <CFormInput
+                        type={showPassword ? 'text' : 'password'}
+                        name="confirmPassword"
+                        placeholder="Confirmar contraseña"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        disabled={loading}
+                      />
+                      <button 
+                        type="button" 
+                        className="btn-ver-password"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={loading}
+                      >
+                        {showPassword ? '👁️‍🗨️' : '👁️'}
+                      </button>
+                    </CInputGroup>
+                    {renderError('confirmPassword')}
+
+                    <CButton 
+                      type="submit" 
+                      color="primary" 
+                      className="w-100"
                       disabled={loading}
-                    />
-                    <button type="button" className="btn-ver-password"
-                      onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? '👁️‍🗨️' : '👁️'}
-                    </button>
-                  </CInputGroup>
-                  {renderError('contrasena')}
+                    >
+                      {loading ? "Registrando..." : "Crear cuenta"}
+                    </CButton>
 
-                  <CInputGroup className="mb-3 password-wrapper">
-                    <CInputGroupText><CIcon icon={cilLockLocked} /></CInputGroupText>
-                    <CFormInput
-                      type={showPassword ? 'text' : 'password'}
-                      name="repetirContrasena"
-                      placeholder="Repetir contraseña"
-                      value={formData.repetirContrasena}
-                      onChange={handleChange}
-                      disabled={loading}
-                    />
-                    <button type="button" className="btn-ver-password"
-                      onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? '👁️‍🗨️' : '👁️'}
-                    </button>
-                  </CInputGroup>
-                  {renderError('repetirContrasena')}
+                    <div className="text-center mt-3">
+                      <p className="mb-0">
+                        ¿Ya tienes una cuenta?{' '}
+                        <CButton 
+                          color="link" 
+                          onClick={() => navigate('/login')}
+                          disabled={loading}
+                        >
+                          Inicia sesión aquí
+                        </CButton>
+                      </p>
+                    </div>
+                  </CForm>
+                </CCardBody>
 
-                  <CButton type="submit" className="btn" disabled={loading}>
-                    {loading ? "Registrando..." : "Crear cuenta"}
-                  </CButton>
-                </CForm>
-              </CCardBody>
+                <CCardBody className="auth-card-right">
+                  <h2>Únete a nuestra comunidad</h2>
+                  <p>
+                    Regístrate para acceder a servicios exclusivos de nuestra clínica veterinaria.
+                    Como cliente podrás:
+                  </p>
+                  <ul className="list-unstyled">
+                    <li>✓ Registrar y gestionar tus mascotas</li>
+                    <li>✓ Agendar citas en línea</li>
+                    <li>✓ Ver historial de consultas</li>
+                    <li>✓ Recibir recordatorios de vacunación</li>
+                    <li>✓ Acceder a promociones especiales</li>
+                  </ul>
+                  <p className="mt-3">
+                    <small>* Todos los campos obligatorios están marcados con validación en tiempo real.</small>
+                  </p>
+                </CCardBody>
 
-              <CCardBody className="auth-card-right">
-                <h2>Únete a nuestra comunidad</h2>
-                <p>
-                  Regístrate para acceder a servicios exclusivos de nuestra clínica y gestionar
-                  de forma profesional y segura la información de tus clientes y pacientes.
-                </p>
-              </CCardBody>
-
-            </CCard>
-          </CCol>
-        </CRow>
-      </CContainer>
-    </div>
+              </CCard>
+            </CCol>
+          </CRow>
+        </CContainer>
+      </div>
+    </>
   )
 }
 
