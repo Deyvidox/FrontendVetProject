@@ -1,225 +1,103 @@
-import React, { useState, useMemo, useEffect } from "react";
-import {
-  CButton,
-  CModal,
-  CModalBody,
-  CModalHeader,
-  CModalTitle,
-} from "@coreui/react";
+import React, { useState, useEffect } from "react";
+import { CButton, CModal, CModalBody, CModalHeader, CModalTitle } from "@coreui/react";
 import AppointmentForm from "./AppointmentForm";
 import AppointmentList from "./AppointmentList";
 import AlertModal from "./AlertModal";
+import { appointmentService } from "./appointmentService";
 
 const AppointmentPage = () => {
   const [appointments, setAppointments] = useState([]);
-  const [mascotas, setMascotas] = useState([]);
-  const [veterinarios, setVeterinarios] = useState([]);
-  const [clientes, setClientes] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editAppointment, setEditAppointment] = useState(null);
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMsg, setAlertMsg] = useState("");
-  const [alertType, setAlertType] = useState("success");
+  const [alert, setAlert] = useState({ open: false, msg: "", type: "success" });
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        // Aquí irá la conexión a tu backend
-        // Ejemplo: const res = await fetch('tu-backend-url/api/appointments');
-        // setAppointments(await res.json());
-        // Similar para mascotas, veterinarios, clientes
-        
-        setAppointments([]);
-        setMascotas([]);
-        setVeterinarios([]);
-        setClientes([]);
-
-      } catch (error) {
-        console.error("Error al cargar datos:", error);
-        setAlertMsg("Error al cargar datos desde el servidor.");
-        setAlertType("error");
-        setAlertOpen(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
-
-  const idxMasc = useMemo(
-    () => Object.fromEntries(mascotas.map((m) => [String(m.id), m])),
-    [mascotas]
-  );
-
-  const idxVet = useMemo(
-    () => Object.fromEntries(veterinarios.map((v) => [String(v.id), v])),
-    [veterinarios]
-  );
-
-  const idxCli = useMemo(
-    () => Object.fromEntries(clientes.map((c) => [String(c.id), c])),
-    [clientes]
-  );
-
-  const appointmentsWithRelations = useMemo(() => {
-    return appointments.map((a) => {
-      const mascota = idxMasc[String(a.mascota_id)];
-      const cliente = mascota ? idxCli[String(mascota.cliente_id)] : null;
-      const veterinario = idxVet[String(a.veterinario_id)];
-
-      return {
-        ...a,
-        mascota,
-        cliente,
-        veterinario,
-        mascotaNombre: mascota?.nombre || 'Desconocida',
-        clienteNombre: cliente?.nombre || 'Desconocido',
-        veterinarioNombre: veterinario?.nombre || 'Desconocido'
-      };
-    });
-  }, [appointments, idxMasc, idxVet, idxCli]);
-
-  const handleSave = async (payload) => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      // Aquí irá la conexión a tu backend
-      // Ejemplo: const response = await fetch('tu-backend-url/api/appointments', {
-      //   method: editAppointment ? 'PUT' : 'POST',
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(payload)
-      // });
-      
-      if (editAppointment) {
-        setAlertMsg("Cita actualizada correctamente.");
-      } else {
-        setAlertMsg("Cita creada correctamente.");
-      }
-
-      setAlertType("success");
-      setAlertOpen(true);
-      setShowModal(false);
-      setEditAppointment(null);
-
+      const data = await appointmentService.getAll();
+      setAppointments(data);
     } catch (error) {
-      console.error("Error al guardar la cita:", error);
-      setAlertMsg(error.message || "Error al guardar la cita.");
-      setAlertType("error");
-      setAlertOpen(true);
+      setAlert({ open: true, msg: "Error al cargar citas de la DB", type: "error" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadData(); }, []);
+
+  const handleSave = async (payload) => {
+    try {
+      if (editAppointment) {
+        await appointmentService.update(editAppointment.id, payload);
+        setAlert({ open: true, msg: "Cita actualizada en la base de datos", type: "success" });
+      } else {
+        await appointmentService.create(payload);
+        setAlert({ open: true, msg: "Cita guardada exitosamente", type: "success" });
+      }
+      setShowModal(false);
+      loadData();
+    } catch (error) {
+      setAlert({ open: true, msg: typeof error === 'string' ? error : "Error de validación", type: "error" });
     }
   };
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm("¿Estás seguro de eliminar esta cita?");
-    
-    if (!confirmed) return;
-
-    setLoading(true);
+    if (!window.confirm("¿Confirmas eliminar este registro real?")) return;
     try {
-      // Aquí irá la conexión a tu backend
-      // Ejemplo: await fetch(`tu-backend-url/api/appointments/${id}`, { method: 'DELETE' });
-      
-      setAppointments(prev => prev.filter(a => a.id !== id));
-      setAlertMsg("Cita eliminada correctamente.");
-      setAlertType("success");
-      setAlertOpen(true);
+      await appointmentService.delete(id);
+      loadData();
     } catch (error) {
-      console.error("Error al eliminar la cita:", error);
-      setAlertMsg(error.message || "Error al eliminar la cita.");
-      setAlertType("error");
-      setAlertOpen(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdateStatus = async (id, newStatus) => {
-    try {
-      // Aquí irá la conexión a tu backend
-      // Ejemplo: await fetch(`tu-backend-url/api/appointments/${id}`, {
-      //   method: 'PATCH',
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ estado: newStatus })
-      // });
-      
-      setAppointments(prev => 
-        prev.map(a => a.id === id ? { ...a, estado: newStatus } : a)
-      );
-    } catch (error) {
-      console.error("Error al actualizar estado:", error);
-      setAlertMsg("Error al actualizar el estado de la cita.");
-      setAlertType("error");
-      setAlertOpen(true);
+      setAlert({ open: true, msg: "No se pudo eliminar", type: "error" });
     }
   };
 
   return (
-    <div className="container mt-3">
+    <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Gestión de Citas</h1>
-        <CButton
-          color="primary"
-          onClick={() => {
-            setEditAppointment(null);
-            setShowModal(true);
-          }}
-          disabled={loading}
-        >
-          {loading ? "Cargando..." : "Agregar Cita"}
+        <h3>Calendario de Citas </h3>
+        <CButton color="primary" onClick={() => { setEditAppointment(null); setShowModal(true); }}>
+          Nueva Cita
         </CButton>
       </div>
 
-      {loading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Cargando...</span>
-          </div>
-          <p className="mt-2">Cargando citas...</p>
-        </div>
-      ) : (
-        <AppointmentList
-          appointments={appointmentsWithRelations}
-          onEdit={(appt) => {
-            setEditAppointment(appt);
-            setShowModal(true);
-          }}
-          onDelete={handleDelete}
-          onUpdateStatus={handleUpdateStatus}
-        />
-      )}
+      <AppointmentList 
+        appointments={appointments} 
+        onEdit={(appt) => {
+          // Adaptamos los nombres de la DB para el formulario (Zod)
+          setEditAppointment({
+            id: appt.id,
+            mascota_id: appt.pet_id || appt.id_mascota, // Depende de tu SELECT SQL
+            estado: appt.estado || appt.status,
+            notas: appt.notas || appt.notes
+          });
+          setShowModal(true);
+        }}
+        onDelete={handleDelete}
+        onUpdateStatus={async (id, status) => {
+          try {
+            await appointmentService.update(id, { estado: status });
+            loadData();
+          } catch (e) { setAlert({ open: true, msg: "Error al cambiar estado", type: "error" }); }
+        }}
+      />
 
-      <CModal
-        visible={showModal}
-        onClose={() => setShowModal(false)}
-        alignment="center"
-        size="lg"
-      >
-        <CModalHeader>
-          <CModalTitle>
-            {editAppointment ? "Editar Cita" : "Crear Cita"}
-          </CModalTitle>
-        </CModalHeader>
+      <CModal visible={showModal} onClose={() => setShowModal(false)} size="lg">
+        <CModalHeader><CModalTitle>{editAppointment ? "Editar Cita" : "Nueva Cita"}</CModalTitle></CModalHeader>
         <CModalBody>
-          <AppointmentForm
-            onSubmit={handleSave}
-            mascotas={mascotas}
-            veterinarios={veterinarios}
-            appointments={appointments}
-            initialValues={editAppointment || undefined}
-            onClose={() => setShowModal(false)}
+          <AppointmentForm 
+            onSubmit={handleSave} 
+            initialValues={editAppointment || {}} 
+            onClose={() => setShowModal(false)} 
           />
         </CModalBody>
       </CModal>
 
-      <AlertModal
-        isOpen={alertOpen}
-        message={alertMsg}
-        type={alertType}
-        onClose={() => setAlertOpen(false)}
+      <AlertModal 
+        isOpen={alert.open} 
+        message={alert.msg} 
+        type={alert.type} 
+        onClose={() => setAlert({ ...alert, open: false })} 
       />
     </div>
   );
