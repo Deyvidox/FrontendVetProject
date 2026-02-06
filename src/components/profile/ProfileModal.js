@@ -67,7 +67,7 @@ const ProfileModal = ({ show, onClose, userData = {}, onSave, mode = 'edit' }) =
 
   const loadRoles = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/roles');
+      const response = await axios.get('https://vetproyectbackend.onrender.com./roles');
       if (response.data.type === "Successfully") {
         setRoles(response.data.message.roles || []);
       }
@@ -84,7 +84,7 @@ const ProfileModal = ({ show, onClose, userData = {}, onSave, mode = 'edit' }) =
   const loadUserDetails = async (userId) => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:4000/users/search/${userId}`);
+      const response = await axios.get(`https://vetproyectbackend.onrender.com./users/search/${userId}`);
       
       if (response.data.type === "Successfully") {
         const user = response.data.message.user;
@@ -224,10 +224,10 @@ const ProfileModal = ({ show, onClose, userData = {}, onSave, mode = 'edit' }) =
       
       if (isEditMode && userData.id) {
         // Actualizar usuario existente
-        response = await axios.post(`http://localhost:4000/users/update/${userData.id}`, payload);
+        response = await axios.post(`https://vetproyectbackend.onrender.com./users/update/${userData.id}`, payload);
       } else {
         // Crear nuevo usuario
-        response = await axios.post('http://localhost:4000/users/register', payload);
+        response = await axios.post('https://vetproyectbackend.onrender.com./users/register', payload);
       }
 
       const { data } = response;

@@ -73,7 +73,7 @@ const Users = () => {
       setError(null);
       
       console.log('📥 Cargando usuarios desde el backend...');
-      const response = await axios.get('http://localhost:4000/users/users', {
+      const response = await axios.get('https://vetproyectbackend.onrender.com./users/users', {
         params: {
           page: 1,
           limit: 100,
@@ -123,7 +123,7 @@ const Users = () => {
       console.log('📝 Actualizando usuario:', updatedUser.id);
       
       const response = await axios.post(
-        `http://localhost:4000/users/update/${updatedUser.id}`,
+        `https://vetproyectbackend.onrender.com./users/update/${updatedUser.id}`,
         {
           first_name: updatedUser.first_name,
           last_name: updatedUser.last_name,
@@ -170,7 +170,7 @@ const Users = () => {
     try {
       console.log('🗑️ Desactivando usuario:', userId);
       
-      const response = await axios.delete(`http://localhost:4000/users/delete/${userId}`);
+      const response = await axios.delete(`https://vetproyectbackend.onrender.com./users/delete/${userId}`);
       
       const { data } = response;
       
@@ -204,7 +204,7 @@ const Users = () => {
     try {
       console.log('📝 Registrando nuevo usuario:', newUser);
       
-      const response = await axios.post('http://localhost:4000/users/register', newUser);
+      const response = await axios.post('https://vetproyectbackend.onrender.com./users/register', newUser);
       
       const { data } = response;
       
@@ -253,7 +253,7 @@ const Users = () => {
     try {
       setLoading(true);
       
-      const response = await axios.post('http://localhost:4000/users/search', {
+      const response = await axios.post('https://vetproyectbackend.onrender.com./users/search', {
         search: searchTerm,
         limit: 50
       });
@@ -401,7 +401,7 @@ const Users = () => {
               </div>
               <div>
                 <small className="text-muted">API:</small>
-                <CBadge color="secondary" className="ms-2">http://localhost:4000</CBadge>
+                <CBadge color="secondary" className="ms-2">https://vetproyectbackend.onrender.com.</CBadge>
               </div>
             </div>
           </div>
