@@ -59,8 +59,7 @@ const AppointmentForm = ({
       setModalMsg("El veterinario ya tiene una cita en ese horario.");
       setModalOpen(true);
       return;
-    }
-
+    }    
     setLoading(true);
 
     try {
@@ -124,7 +123,7 @@ const AppointmentForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(submitHandler)} className="appointment-form">
+    <form onSubmit={handleSubmit()} className="appointment-form">
       <div className="auth-header">
         <h1>{initialValues.id ? "Editar Cita" : "Crear Cita"}</h1>
         <p>Completa los datos para agendar tu cita.</p>
