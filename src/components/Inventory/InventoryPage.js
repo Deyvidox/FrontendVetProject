@@ -1,162 +1,143 @@
-import React, { useState, useEffect } from 'react';
-import { CButton, CModal, CModalBody, CModalHeader, CModalTitle } from '@coreui/react';
-import InventoryForm from './InventoryForm';
-import InventoryTable from './InventoryTable';
-import AlertModal from './AlertModal';
-import '../../css/Inventory/inventory.css';
+import React, { useEffect, useState, useCallback } from "react";
+import { getInventoryRequest, deleteProductRequest } from "./inventoryService";
+import { useNavigate } from "react-router-dom";
+import InventoryTable from "./InventoryTable";
+import { CButton, CRow, CCol, CFormInput, CFormSelect, CSpinner, CAlert } from '@coreui/react';
 
-const InventoryPage = () => {
-  const [inventory, setInventory] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [editProduct, setEditProduct] = useState(null);
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMsg, setAlertMsg] = useState('');
-  const [alertType, setAlertType] = useState('success');
-  const [loading, setLoading] = useState(false);
+function InventoryPage() {
+    const [inventory, setInventory] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    
+    // Estados para los filtros
+    const [searchTerm, setSearchTerm] = useState("");
+    const [categoryFilter, setCategoryFilter] = useState("");
+    
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchInventory = async () => {
-      setLoading(true);
-      try {
-        // Aquí irá la conexión a tu backend
-        // Ejemplo: const res = await fetch('tu-backend-url/api/inventory');
-        // setInventory(res.data);
-        
-        setInventory([]);
-      } catch (err) {
-        console.error('Error al cargar inventario', err);
-        setAlertMsg('Error al cargar inventario');
-        setAlertType('error');
-        setAlertOpen(true);
-      } finally {
-        setLoading(false);
-      }
+    const loadInventory = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const params = {
+                search: searchTerm.trim() || undefined,
+                type: categoryFilter || undefined
+            };
+            
+            const response = await getInventoryRequest(params);
+            
+            if (response.success) {
+                setInventory(response.data);
+            } else {
+                setError("No se pudo obtener la lista de productos.");
+            }
+        } catch (err) {
+            console.error("Error al cargar inventario:", err);
+            setError("Error de conexión con el servidor.");
+        } finally {
+            setLoading(false);
+        }
+    }, [searchTerm, categoryFilter]);
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            loadInventory();
+        }, 400);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [loadInventory]);
+
+    const handleDelete = async (id) => {
+        if (window.confirm("¿Estás seguro de que deseas eliminar este producto?")) {
+            try {
+                const res = await deleteProductRequest(id);
+                if (res.success) {
+                    loadInventory();
+                } else {
+                    alert(res.message || "Error al eliminar.");
+                }
+            } catch (err) {
+                alert(err.response?.data?.message || "Error al procesar la eliminación.");
+            }
+        }
     };
-    fetchInventory();
-  }, []);
 
-  const handleSave = async (product) => {
-    setLoading(true);
-    try {
-      const payload = {
-        nombre: product.nombre || '',
-        tipo: product.tipo || 'Otro',
-        instrucciones: product.instrucciones || '',
-        cantidad: product.cantidad || 0,
-        precio_unitario: product.precio_unitario || 0,
-        estado: product.estado || 'Disponible',
-        tags: product.tags || [],
-        imagen_url: product.imagen_url || '',
-      };
+    return (
+        <div className="container-fluid p-4" style={{ minHeight: '100vh' }}>
+            {/* Cabecera Estilizada */}
+            <CRow className="mb-4 align-items-center">
+                <CCol md={5}>
+                    <div className="d-flex align-items-center">
+                        <div className="bg-primary rounded-3 p-2 me-3 shadow">
+                            <span className="fs-4 text-white">📦</span>
+                        </div>
+                        <div>
+                            <h3 className="text-white fw-bold mb-0">Gestión de Inventario</h3>
+                            <p className="text-info small mb-0">Control de stock y suministros médicos</p>
+                        </div>
+                    </div>
+                </CCol>
+                
+                <CCol md={7} className="d-flex gap-2 justify-content-end flex-wrap mt-3 mt-md-0">
+                    <CFormInput 
+                        type="text"
+                        placeholder="🔍 Buscar producto..." 
+                        className="border-0 shadow-sm bg-dark text-white p-2 px-3 rounded-pill"
+                        style={{ maxWidth: '280px', border: '1px solid #3b3b5e' }}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <CFormSelect 
+                        className="border-0 shadow-sm bg-dark text-white p-2 rounded-pill cursor-pointer"
+                        style={{ maxWidth: '200px', border: '1px solid #3b3b5e' }}
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                    >
+                        <option value="">📁 Todas las Categorías</option>
+                        <option value="Medicine">Medicamentos</option>
+                        <option value="Vaccine">Vacunas</option>
+                        <option value="Accessory">Accesorios</option>
+                        <option value="Food">Alimentos</option>
+                        <option value="Other">Otros</option>
+                    </CFormSelect>
+                    <CButton 
+                        color="primary" 
+                        className="px-4 fw-bold rounded-pill shadow-sm"
+                        onClick={() => navigate('/inventory/add')}
+                    >
+                        + Nuevo Producto
+                    </CButton>
+                </CCol>
+            </CRow>
 
-      // Aquí irá la conexión a tu backend
-      if (editProduct) {
-        // Ejemplo: await fetch(`tu-backend-url/api/inventory/${editProduct.id}`, {
-        //   method: 'PUT',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(payload)
-        // });
-        
-        setAlertMsg('Producto actualizado correctamente');
-      } else {
-        // Ejemplo: await fetch('tu-backend-url/api/inventory', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(payload)
-        // });
-        
-        setAlertMsg('Producto agregado correctamente');
-      }
+            {/* Alertas con estilo */}
+            {error && (
+                <CAlert color="danger" className="border-0 shadow mb-4">
+                    <strong>¡Atención!</strong> {error}
+                </CAlert>
+            )}
 
-      setAlertType('success');
-      setAlertOpen(true);
-      setShowModal(false);
-      setEditProduct(null);
-
-    } catch (err) {
-      console.error('Error al guardar producto', err);
-      setAlertMsg('Error al guardar producto');
-      setAlertType('error');
-      setAlertOpen(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEdit = (product) => {
-    setEditProduct(product);
-    setShowModal(true);
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Desea eliminar este producto?')) {
-      setLoading(true);
-      try {
-        // Aquí irá la conexión a tu backend
-        // Ejemplo: await fetch(`tu-backend-url/api/inventory/${id}`, { method: 'DELETE' });
-        
-        setInventory(prev => prev.filter(item => item.id !== id));
-        setAlertMsg('Producto eliminado correctamente');
-        setAlertType('success');
-        setAlertOpen(true);
-      } catch (err) {
-        console.error('Error al eliminar producto', err);
-        setAlertMsg('Error al eliminar producto');
-        setAlertType('error');
-        setAlertOpen(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  return (
-    <div className="container">
-      <CButton 
-        color="primary" 
-        className="add-product-btn" 
-        onClick={() => setShowModal(true)}
-        disabled={loading}
-      >
-        {loading ? "Cargando..." : "Agregar Producto"}
-      </CButton>
-
-      {loading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Cargando...</span>
-          </div>
-          <p className="mt-2">Cargando inventario...</p>
+            {/* Contenedor Principal de la Tabla */}
+            <CRow>
+                <CCol xs={12}>
+                    {loading ? (
+                        <div className="text-center py-5 rounded shadow" style={{ backgroundColor: '#0d0e0b' }}>
+                            <CSpinner color="info" variant="grow" size="xl" />
+                            <p className="text-info mt-3 fw-semibold">Sincronizando inventario en tiempo real...</p>
+                        </div>
+                    ) : (
+                        <div className="shadow-lg">
+                            <InventoryTable 
+                                inventory={inventory} 
+                                onDelete={handleDelete}
+                                onEdit={(item) => navigate(`/inventory/edit/${item.id}`)}
+                            />
+                        </div>
+                    )}
+                </CCol>
+            </CRow>
         </div>
-      ) : (
-        <InventoryTable
-          inventory={inventory}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-      )}
-
-      <CModal visible={showModal} onClose={() => setShowModal(false)}>
-        <CModalHeader>
-          <CModalTitle>{editProduct ? 'Editar Producto' : 'Agregar Producto'}</CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          <InventoryForm
-            onSubmit={handleSave}
-            initialValues={editProduct || undefined}
-            onClose={() => setShowModal(false)}
-          />
-        </CModalBody>
-      </CModal>
-
-      <AlertModal
-        isOpen={alertOpen}
-        message={alertMsg}
-        type={alertType}
-        onClose={() => setAlertOpen(false)}
-      />
-    </div>
-  );
-};
+    );
+}
 
 export default InventoryPage;

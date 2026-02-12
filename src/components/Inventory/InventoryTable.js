@@ -1,167 +1,148 @@
-// InventoryTable.jsx
-import React, { useMemo, useState } from 'react';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-  CButton,
-  CFormSelect,
-  CFormInput,
+import React from 'react';
+import { 
+  CTable, CTableHead, CTableRow, CTableHeaderCell, 
+  CTableBody, CTableDataCell, CButton, CAvatar 
 } from '@coreui/react';
-import { jsPDF } from 'jspdf';
-import * as XLSX from 'xlsx';
+import { cilTrash, cilPencil } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 
 const InventoryTable = ({ inventory, onEdit, onDelete }) => {
-  const [search, setSearch] = useState('');
-  const [busquedaActiva, setBusquedaActiva] = useState(false);
-  const [filtroEstado, setFiltroEstado] = useState('Todos');
-  const [filtroTipo, setFiltroTipo] = useState('Todos');
+    
+    // Configuración de colores para los estados (Badges) con alto contraste
+    const getStatusStyle = (status) => {
+        const s = status?.toLowerCase();
+        if (s.includes('disponible') || s.includes('available')) {
+            return { backgroundColor: 'rgba(46, 184, 92, 0.2)', color: '#39ef7d', border: '1px solid #2eb85c' };
+        }
+        if (s.includes('agotado') || s.includes('out')) {
+            return { backgroundColor: 'rgba(229, 83, 83, 0.2)', color: '#ff6666', border: '1px solid #e55353' };
+        }
+        if (s.includes('interrumpido') || s.includes('discontinued')) {
+            return { backgroundColor: 'rgba(249, 177, 21, 0.2)', color: '#f9b115', border: '1px solid #f9b115' };
+        }
+        return { backgroundColor: 'rgba(99, 111, 131, 0.2)', color: '#aab3c2', border: '1px solid #636f83' };
+    };
 
-  // Filtrado optimizado con useMemo
-  const filteredInventory = useMemo(
-    () =>
-      inventory.filter(
-        (item) =>
-          (filtroEstado === 'Todos' || item.estado === filtroEstado) &&
-          (filtroTipo === 'Todos' || item.tipo === filtroTipo) &&
-          (!busquedaActiva ||
-            !search.trim() ||
-            item.nombre.toLowerCase().includes(search.toLowerCase()))
-      ),
-    [inventory, filtroEstado, filtroTipo, search, busquedaActiva]
-  );
+    return (
+        <CTable align="middle" responsive hover className="shadow-lg border-0 rounded-4 overflow-hidden" style={{ backgroundColor: '#1a1a36' }}>
+            {/* BARRA DE ENCABEZADO EN BLANCO */}
+            <CTableHead style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderBottom: '1px solid #2d2d5a' }}>
+                <CTableRow>
+                    <CTableHeaderCell className="ps-4 py-3 text-white fw-bold border-0 text-uppercase small" style={{ letterSpacing: '1px' }}>
+                        Producto
+                    </CTableHeaderCell>
+                    <CTableHeaderCell className="text-white fw-bold border-0 text-uppercase small" style={{ letterSpacing: '1px' }}>
+                        Categoría
+                    </CTableHeaderCell>
+                    <CTableHeaderCell className="text-white fw-bold border-0 text-uppercase small text-center" style={{ letterSpacing: '1px' }}>
+                        Stock
+                    </CTableHeaderCell>
+                    <CTableHeaderCell className="text-white fw-bold border-0 text-uppercase small" style={{ letterSpacing: '1px' }}>
+                        Precio Unit.
+                    </CTableHeaderCell>
+                    <CTableHeaderCell className="text-white fw-bold border-0 text-uppercase small text-center" style={{ letterSpacing: '1px' }}>
+                        Estado
+                    </CTableHeaderCell>
+                    <CTableHeaderCell className="text-white fw-bold border-0 text-uppercase small text-center" style={{ letterSpacing: '1px' }}>
+                        Acciones
+                    </CTableHeaderCell>
+                </CTableRow>
+            </CTableHead>
 
-  // Colores de estado
-  const getStateColor = (estado) => {
-    if (estado === 'Disponible') return 'text-success';
-    if (estado === 'Agotado') return 'text-danger';
-    return 'text-secondary';
-  };
+            <CTableBody>
+                {inventory.length > 0 ? (
+                    inventory.map((item) => (
+                        <CTableRow key={item.id} className="align-middle border-bottom border-secondary-subtle" style={{ backgroundColor: 'transparent' }}>
+                            <CTableDataCell className="ps-4 py-3 border-0">
+                                <div className="d-flex align-items-center">
+                                    <CAvatar 
+                                        size="xl" 
+                                        src={item.image_url || 'https://via.placeholder.com/75?text=Prod'} 
+                                        className="border border-2 border-secondary shadow-sm"
+                                        style={{ backgroundColor: '#3b3b5e' }}
+                                    />
+                                    <div className="ms-3">
+                                        {/* NOMBRE DEL PRODUCTO EN BLANCO */}
+                                        <div className="fw-bold text-white" style={{ fontSize: '1rem' }}>
+                                            {item.name}
+                                        </div>
+                                        <div className="text-info opacity-75 small">SKU: #INV-{item.id}</div>
+                                    </div>
+                                </div>
+                            </CTableDataCell>
+                            
+                            <CTableDataCell className="border-0">
+                                <span className="badge bg-dark text-info border border-info border-opacity-25 fw-normal">
+                                    {item.type}
+                                </span>
+                            </CTableDataCell>
 
-  // Exportar PDF
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(14);
-    doc.text('Reporte de Inventario', 14, 18);
-    let y = 28;
+                            <CTableDataCell className="text-center border-0">
+                                {/* STOCK EN BLANCO O AMARILLO SI ES BAJO */}
+                                <div className={`fw-bold ${item.quantity < 5 ? 'text-warning' : 'text-white'}`} style={{ fontSize: '1rem' }}>
+                                    {item.quantity}
+                                    <span className="ms-1 fw-normal opacity-50 small">unids</span>
+                                </div>
+                            </CTableDataCell>
 
-    filteredInventory.forEach((item, idx) => {
-      doc.setFontSize(11);
-      doc.text(
-        `${idx + 1}. Nombre: ${item.nombre} | Tipo: ${item.tipo} | Estado: ${item.estado}`,
-        14,
-        y
-      );
-      y += 6;
-      doc.text(`Cantidad: ${item.cantidad} | Precio: ${item.precio_unitario.toFixed(2)}`, 14, y);
-      y += 8;
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
-    });
+                            <CTableDataCell className="border-0">
+                                {/* PRECIO EN BLANCO */}
+                                <span className="fw-bold text-white" style={{ fontSize: '1.05rem' }}>
+                                    ${parseFloat(item.unit_price || 0).toFixed(2)}
+                                </span>
+                            </CTableDataCell>
 
-    doc.save('inventario.pdf');
-  };
+                            <CTableDataCell className="text-center border-0">
+                                <span 
+                                    className="badge rounded-pill" 
+                                    style={{
+                                        ...getStatusStyle(item.status),
+                                        padding: '0.6em 1.2em',
+                                        fontSize: '0.7rem',
+                                        minWidth: '100px',
+                                        fontWeight: '700',
+                                        textTransform: 'uppercase'
+                                    }}
+                                >
+                                    {item.status}
+                                </span>
+                            </CTableDataCell>
 
-  // Exportar Excel
-  const exportXLS = () => {
-    const data = filteredInventory.map((item) => ({
-      Nombre: item.nombre,
-      Tipo: item.tipo,
-      Cantidad: item.cantidad,
-      Precio: item.precio_unitario.toFixed(2),
-      Estado: item.estado,
-      Instrucciones: item.instrucciones || '',
-      Tags: item.tags?.join(', ') || '',
-    }));
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Inventario');
-    XLSX.writeFile(wb, 'inventario.xlsx');
-  };
-
-  return (
-    <div className="inventory-list-section">
-      <h3 className="list-title">Lista de Productos</h3>
-      <p className="list-summary">Se muestran {filteredInventory.length} productos.</p>
-
-      <div className="d-flex gap-2 mb-3">
-        <CFormInput
-          placeholder="Buscar por nombre"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button type="button" onClick={() => setBusquedaActiva(!busquedaActiva)}>
-          {busquedaActiva ? 'Desactivar búsqueda' : 'Buscar'}
-        </button>
-
-        <CFormSelect value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)}>
-          <option value="Todos">Todos</option>
-          <option value="Medicina">Medicina</option>
-          <option value="Vacuna">Vacuna</option>
-          <option value="Accesorio">Accesorio</option>
-          <option value="Alimento">Alimento</option>
-          <option value="Otro">Otro</option>
-        </CFormSelect>
-
-        <CFormSelect value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
-          <option value="Todos">Todos</option>
-          <option value="Disponible">Disponible</option>
-          <option value="Agotado">Agotado</option>
-          <option value="Descontinuado">Descontinuado</option>
-        </CFormSelect>
-
-        <button type="button" onClick={exportPDF}>
-          PDF
-        </button>
-        <button type="button" onClick={exportXLS}>
-          Excel
-        </button>
-      </div>
-
-      <CTable bordered hover>
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Nombre</CTableHeaderCell>
-            <CTableHeaderCell>Tipo</CTableHeaderCell>
-            <CTableHeaderCell>Cantidad</CTableHeaderCell>
-            <CTableHeaderCell>Precio</CTableHeaderCell>
-            <CTableHeaderCell>Estado</CTableHeaderCell>
-            <CTableHeaderCell>Tags</CTableHeaderCell>
-            <CTableHeaderCell>Imagen</CTableHeaderCell>
-            <CTableHeaderCell>Acciones</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {filteredInventory.map((item) => (
-            <CTableRow key={item.id}>
-              <CTableDataCell>{item.nombre}</CTableDataCell>
-              <CTableDataCell>{item.tipo}</CTableDataCell>
-              <CTableDataCell>{item.cantidad}</CTableDataCell>
-              <CTableDataCell>{item.precio_unitario.toFixed(2)}</CTableDataCell>
-              <CTableDataCell className={getStateColor(item.estado)}>{item.estado}</CTableDataCell>
-              <CTableDataCell>{item.tags?.join(', ')}</CTableDataCell>
-              <CTableDataCell>
-                {item.imagen_url && <img src={item.imagen_url} alt="Producto" width="50" />}
-              </CTableDataCell>
-              <CTableDataCell>
-                <CButton color="warning" size="sm" onClick={() => onEdit(item)}>
-                  Editar
-                </CButton>
-                <CButton color="danger" size="sm" className="ms-1" onClick={() => onDelete(item.id)}>
-                  Eliminar
-                </CButton>
-              </CTableDataCell>
-            </CTableRow>
-          ))}
-        </CTableBody>
-      </CTable>
-    </div>
-  );
+                            <CTableDataCell className="text-center pe-4 border-0">
+                                <div className="d-flex gap-2 justify-content-center">
+                                    <CButton 
+                                        color="info" 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="px-3 rounded-pill border-opacity-50" 
+                                        onClick={() => onEdit(item)}
+                                    >
+                                        <CIcon icon={cilPencil} className="text-info" />
+                                    </CButton>
+                                    <CButton 
+                                        color="danger" 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="px-3 rounded-pill border-opacity-50" 
+                                        onClick={() => onDelete(item.id)}
+                                    >
+                                        <CIcon icon={cilTrash} />
+                                    </CButton>
+                                </div>
+                            </CTableDataCell>
+                        </CTableRow>
+                    ))
+                ) : (
+                    <CTableRow>
+                        <CTableDataCell colSpan="6" className="text-center py-5 border-0">
+                            <div className="fs-1 opacity-25">📦</div>
+                            <p className="text-white fw-bold mb-0 opacity-75">No hay productos disponibles.</p>
+                        </CTableDataCell>
+                    </CTableRow>
+                )}
+            </CTableBody>
+        </CTable>
+    );
 };
 
 export default InventoryTable;
