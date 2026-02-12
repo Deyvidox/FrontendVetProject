@@ -1,290 +1,111 @@
 import React, { useState, useEffect } from 'react';
-import {
-  CCard,
-  CCardHeader,
-  CCardBody,
-  CRow,
-  CCol,
-  CButton,
-  CModal,
-  CModalHeader,
-  CModalTitle,
-  CModalBody,
-  CModalFooter,
-  CAlert,
-  CSpinner
+import { 
+  CRow, CCol, CCard, CCardBody, CCardImage, CCardTitle, CCardText, 
+  CButton, CFormSelect, CSpinner, CBadge 
 } from '@coreui/react';
-import { cilHeart, cilCalendar } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-import '../../css/pets/MyPets.css';
-
-const API_URL = "http://localhost:3001";
+import { cilPencil, cilFilter } from '@coreui/icons';
+import { getPets } from './PetService';
+import EditPetModal from './EditPetModal'; // Componente que crearemos abajo
 
 const MyPets = () => {
-  const [selectedPet, setSelectedPet] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showMedicalHistory, setShowMedicalHistory] = useState(false);
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState('Todas');
+  const [selectedPet, setSelectedPet] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const fetchPets = async () => {
+    setLoading(true);
+    try {
+      const res = await getPets({ categoria: filter });
+      setPets(res.data);
+    } catch (err) {
+      console.error("Error cargando mascotas");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadPets = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await fetch(`${API_URL}/pets`);
-        if (!response.ok) {
-          throw new Error('Error loading pets');
-        }
-        
-        const petsData = await response.json();
-        setPets(petsData);
-      } catch (error) {
-        console.error('Error loading pets:', error);
-        setError('Failed to load pets. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchPets();
+  }, [filter]);
 
-    loadPets();
-  }, []);
-
-  const handlePetClick = (pet) => {
+  const handleEdit = (pet) => {
     setSelectedPet(pet);
-    setShowModal(true);
+    setModalVisible(true);
   };
-
-  const handleViewMedicalHistory = () => {
-    setShowMedicalHistory(true);
-  };
-
-  const getSpeciesIcon = (species) => {
-    return cilHeart;
-  };
-
-  // Simple placeholder without external images
-  const PetPlaceholder = ({ species, name }) => {
-    const color = species === 'dog' ? '#4f46e5' : species === 'cat' ? '#ec4899' : '#10b981';
-    const emoji = species === 'dog' ? '🐶' : species === 'cat' ? '🐱' : '🐦';
-    
-    return (
-      <div 
-        className="pet-placeholder"
-        style={{
-          backgroundColor: color,
-          width: '100%',
-          height: '200px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontSize: '3rem'
-        }}
-      >
-        <div>{emoji}</div>
-        <div style={{ fontSize: '1rem', marginTop: '0.5rem' }}>{name}</div>
-      </div>
-    );
-  };
-
-  if (loading) {
-    return (
-      <CCard className="my-pets-card">
-        <CCardBody>
-          <div className="text-center py-5">
-            <CSpinner color="primary" />
-            <p className="mt-2">Loading pets...</p>
-          </div>
-        </CCardBody>
-      </CCard>
-    );
-  }
-
-  if (error) {
-    return (
-      <CCard className="my-pets-card">
-        <CCardBody>
-          <CAlert color="danger">
-            {error}
-          </CAlert>
-        </CCardBody>
-      </CCard>
-    );
-  }
 
   return (
     <>
-      <CCard className="my-pets-card">
-        <CCardHeader>
-          <h5 className="mb-0">
-            <CIcon icon={cilHeart} className="me-2" />
-            My Pets
-          </h5>
-        </CCardHeader>
+      <CCard className="mb-4">
         <CCardBody>
-          {pets.length > 0 ? (
-            <CRow>
-              {pets.map(pet => (
-                <CCol md={6} lg={4} key={pet.id} className="mb-4">
-                  <CCard 
-                    className="pet-card h-100" 
-                    onClick={() => handlePetClick(pet)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <PetPlaceholder species={pet.species} name={pet.name} />
-                    <CCardBody className="pet-card-body">
-                      <div className="pet-species-badge">
-                        <CIcon icon={getSpeciesIcon(pet.species)} />
-                        <span className="text-capitalize">{pet.species}</span>
-                      </div>
-                      <h6 className="pet-name">{pet.name}</h6>
-                      <p className="pet-breed text-muted">{pet.breed}</p>
-                      <div className="pet-info">
-                        <small className="text-muted">
-                          <CIcon icon={cilCalendar} className="me-1" />
-                          {pet.age}
-                        </small>
-                        <small className="text-muted ms-2">
-                          ⚖️ {pet.weight} kg
-                        </small>
-                      </div>
-                      <div className="pet-status">
-                        <span className={`badge ${pet.status === 'active' ? 'bg-success' : 'bg-secondary'}`}>
-                          {pet.status}
-                        </span>
-                      </div>
-                    </CCardBody>
-                  </CCard>
-                </CCol>
-              ))}
-            </CRow>
-          ) : (
-            <div className="text-center py-5">
-              <CIcon icon={cilHeart} size="3xl" className="text-muted mb-3" />
-              <h5>No pets registered</h5>
-              <p className="text-muted">Start by registering your first pet!</p>
-            </div>
-          )}
+          <CRow className="align-items-center">
+            <CCol md={4}>
+              <h4 className="mb-0">Mis Pacientes</h4>
+            </CCol>
+            <CCol md={8}>
+              <div className="d-flex align-items-center justify-content-end">
+                <CIcon icon={cilFilter} className="me-2" />
+               <CFormSelect 
+  className="shadow-sm"
+  style={{ width: '250px' }}
+  value={filter}
+  onChange={(e) => setFilter(e.target.value)}
+>
+  <option value="Todas">Todas las especies</option>
+  <option value="Canino">Caninos </option>
+  <option value="Felino">Felinos </option>
+  <option value="Ave">Aves </option>
+  <option value="Equino">Equinos </option>
+  <option value="Reptil">Reptiles </option>
+  <option value="Roedor">Roedores </option>
+</CFormSelect>
+              </div>
+            </CCol>
+          </CRow>
         </CCardBody>
       </CCard>
 
-      {/* Pet Details Modal */}
-      <CModal 
-        visible={showModal} 
-        onClose={() => setShowModal(false)}
-        size="lg"
-      >
-        <CModalHeader>
-          <CModalTitle>
-            <CIcon icon={getSpeciesIcon(selectedPet?.species)} className="me-2" />
-            {selectedPet?.name}
-          </CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          {selectedPet && (
-            <CRow>
-              <CCol md={6}>
-                <PetPlaceholder species={selectedPet.species} name={selectedPet.name} />
-              </CCol>
-              <CCol md={6}>
-                <div className="pet-details">
-                  <h6 className="text-muted text-uppercase">Details</h6>
-                  <div className="detail-item">
-                    <strong>Species:</strong> 
-                    <span className="text-capitalize">{selectedPet.species}</span>
-                  </div>
-                  <div className="detail-item">
-                    <strong>Breed:</strong> {selectedPet.breed}
-                  </div>
-                  <div className="detail-item">
-                    <strong>Age:</strong> {selectedPet.age}
-                  </div>
-                  <div className="detail-item">
-                    <strong>Weight:</strong> {selectedPet.weight} kg
-                  </div>
-                  <div className="detail-item">
-                    <strong>Color:</strong> {selectedPet.color}
-                  </div>
-                  <div className="detail-item">
-                    <strong>Owner:</strong> {selectedPet.owner}
-                  </div>
-                  <div className="detail-item">
-                    <strong>Email:</strong> {selectedPet.ownerEmail}
-                  </div>
-                  <div className="detail-item">
-                    <strong>Status:</strong> 
-                    <span className={`badge ${selectedPet.status === 'active' ? 'bg-success' : 'bg-secondary'} ms-2`}>
-                      {selectedPet.status}
-                    </span>
-                  </div>
-                  <div className="detail-item">
-                    <strong>Description:</strong> 
-                    <p className="mt-1">{selectedPet.description}</p>
-                  </div>
-                </div>
-              </CCol>
-            </CRow>
-          )}
-        </CModalBody>
-        <CModalFooter>
-          <CButton 
-            color="primary" 
-            onClick={handleViewMedicalHistory}
-            disabled={!selectedPet?.medical_history?.length}
-          >
-            View Medical History ({selectedPet?.medical_history?.length || 0})
-          </CButton>
-          <CButton color="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </CButton>
-        </CModalFooter>
-      </CModal>
+      {loading ? (
+        <div className="text-center"><CSpinner color="primary" /></div>
+      ) : (
+        <CRow>
+          {pets.map(pet => (
+            <CCol sm={6} md={4} key={pet.id} className="mb-4">
+              <CCard className="h-100 shadow-sm">
+                <CCardImage 
+                  orientation="top" 
+                  src={pet.image_url || 'https://via.placeholder.com/150?text=Sin+Foto'} 
+                  style={{ height: '200px', objectFit: 'cover' }}
+                />
+                <CCardBody>
+                  <CCardTitle className="d-flex justify-content-between">
+                    {pet.name}
+                    <CBadge color="info">{pet.species_name}</CBadge>
+                  </CCardTitle>
+                  <CCardText className="small text-muted">
+                    Raza: {pet.breed || 'N/A'}<br />
+                    Dueño: {pet.owner_name}
+                  </CCardText>
+                  <CButton color="warning" size="sm" onClick={() => handleEdit(pet)}>
+                    <CIcon icon={cilPencil} /> Editar Datos
+                  </CButton>
+                </CCardBody>
+              </CCard>
+            </CCol>
+          ))}
+        </CRow>
+      )}
 
-      {/* Medical History Modal */}
-      <CModal 
-        visible={showMedicalHistory} 
-        onClose={() => setShowMedicalHistory(false)}
-        size="lg"
-      >
-        <CModalHeader>
-          <CModalTitle>
-            Medical History - {selectedPet?.name}
-          </CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          {selectedPet?.medical_history?.length > 0 ? (
-            <div className="medical-history">
-              {selectedPet.medical_history.map((record, index) => (
-                <div key={index} className="medical-record p-3 mb-2 border rounded">
-                  <div className="d-flex justify-content-between">
-                    <strong>{record.procedure}</strong>
-                    <span className="text-muted">{new Date(record.date).toLocaleDateString('en-US')}</span>
-                  </div>
-                  <div className="text-muted">Veterinarian: {record.veterinarian}</div>
-                  {record.notes && (
-                    <div className="mt-2">
-                      <small>Notes: {record.notes}</small>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-3">
-              <p className="text-muted">No medical records found.</p>
-            </div>
-          )}
-        </CModalBody>
-        <CModalFooter>
-          <CButton color="secondary" onClick={() => setShowMedicalHistory(false)}>
-            Close
-          </CButton>
-        </CModalFooter>
-      </CModal>
+      {selectedPet && (
+        <EditPetModal 
+          visible={modalVisible} 
+          setVisible={setModalVisible} 
+          pet={selectedPet} 
+          onUpdate={fetchPets}
+        />
+      )}
     </>
   );
 };

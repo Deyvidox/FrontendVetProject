@@ -25,18 +25,15 @@ function InventoryForm() {
     const [fetching, setFetching] = useState(false);
     const [errorMsg, setErrorMsg] = useState(null);
 
-    // 1. CARGA DE DATOS (Modo Edición)
+    // Carga de datos
     useEffect(() => {
         if (id) {
             const loadProductData = async () => {
                 setFetching(true);
                 try {
-                    // Buscamos por ID usando nuestro servicio
                     const res = await getInventoryRequest({ id });
                     if (res?.success && res?.data) {
                         const p = Array.isArray(res.data) ? res.data[0] : res.data;
-                        
-                        // Mapeamos los valores de la DB al formulario
                         setValue('name', p.name || '');
                         setValue('type', p.type || '');
                         setValue('status', p.status || 'Available');
@@ -45,7 +42,6 @@ function InventoryForm() {
                         setValue('instructions', p.instructions || '');
                     }
                 } catch (error) {
-                    console.error("Error al obtener producto:", error);
                     setErrorMsg("No se pudo cargar la información del producto.");
                 } finally {
                     setFetching(false);
@@ -55,18 +51,11 @@ function InventoryForm() {
         }
     }, [id, setValue]);
 
-    // 2. ENVÍO DE DATOS
     const onSubmit = async (data) => {
         setLoading(true);
         setErrorMsg(null);
         try {
-            // Estructuramos el objeto antes de enviarlo
-            const payload = {
-                ...data,
-                // Aseguramos que la imagen se pase como el array de archivos de React Hook Form
-                imagen: data.imagen
-            };
-
+            const payload = { ...data }; 
             const res = id 
                 ? await updateProductRequest(id, payload) 
                 : await createProductRequest(payload);
@@ -77,7 +66,6 @@ function InventoryForm() {
                 setErrorMsg(res?.message || "Error al guardar en el servidor");
             }
         } catch (error) {
-            console.error("Error en submit:", error);
             setErrorMsg(error.response?.data?.message || "Error crítico de conexión");
         } finally {
             setLoading(false);
@@ -86,47 +74,50 @@ function InventoryForm() {
 
     if (fetching) {
         return (
-            <div className="d-flex flex-column align-items-center py-5">
-                <CSpinner color="primary" variant="grow" size="lg" />
-                <p className="text-white mt-3">Cargando datos del producto...</p>
+            <div className="d-flex flex-column align-items-center py-5" style={{ minHeight: '60vh' }}>
+                <CSpinner color="primary" variant="grow" size="xl" />
+                <p className="text-primary mt-3 fw-bold">Sincronizando datos del producto...</p>
             </div>
         );
     }
 
     return (
-        <CRow className="justify-content-center p-3">
-            <CCol md={8} lg={6}>
-                <CCard className="shadow-lg border-0 bg-dark text-white">
-                    <CCardHeader className="bg-primary text-white py-3">
-                        <h5 className="mb-0">
-                            {id ? `Editando Producto: #${id}` : 'Nuevo Registro de Inventario'}
-                        </h5>
+        <CRow className="justify-content-center p-3 animate__animated animate__fadeIn">
+            <CCol md={10} lg={8}>
+                <CCard className="border-0 shadow-lg overflow-hidden" style={{ borderRadius: '15px' }}>
+                    <CCardHeader className="bg-dark text-white py-3 border-0">
+                        <div className="d-flex align-items-center">
+                            <h5 className="mb-0 fw-bold">
+                                📦 {id ? `Editar Producto: ${id}` : 'Nuevo Registro de Inventario'}
+                            </h5>
+                        </div>
                     </CCardHeader>
-                    <CCardBody className="p-4">
-                        {errorMsg && <CAlert color="danger">{errorMsg}</CAlert>}
+                    
+                    <CCardBody className="p-4" style={{ backgroundColor: '#f9f9fb' }}>
+                        {errorMsg && <CAlert color="danger" className="border-0 shadow-sm">{errorMsg}</CAlert>}
                         
                         <CForm onSubmit={handleSubmit(onSubmit)}>
-                            {/* Nombre */}
-                            <div className="mb-3">
-                                <CFormInput
-                                    label="Nombre del Producto"
-                                    className="bg-dark"
-                                    placeholder="Ej. Antipulgas Nexgard"
-                                    {...register('name', { required: "El nombre es obligatorio" })}
-                                    invalid={!!errors.name}
-                                    feedback={errors.name?.message}
-                                />
-                            </div>
-                            
-                            <CRow>
+                            <CRow className="g-3">
+                                {/* Nombre */}
+                                <CCol md={12}>
+                                    <CFormLabel className="fw-semibold text-secondary small text-uppercase">Nombre del Producto</CFormLabel>
+                                    <CFormInput
+                                        className="shadow-sm border-0 p-2"
+                                        placeholder="Ej. Antipulgas Nexgard"
+                                        {...register('name', { required: "El nombre es obligatorio" })}
+                                        invalid={!!errors.name}
+                                    />
+                                </CCol>
+                                
                                 {/* Categoría */}
-                                <CCol md={6} className="mb-3">
+                                <CCol md={6}>
+                                    <CFormLabel className="fw-semibold text-secondary small text-uppercase">Categoría</CFormLabel>
                                     <CFormSelect 
-                                        label="Categoría" 
+                                        className="shadow-sm border-0 p-2"
                                         {...register('type', { required: "Seleccione una categoría" })}
                                         invalid={!!errors.type}
                                     >
-                                        <option value="">Seleccionar...</option>
+                                        <option value="">Seleccione...</option>
                                         <option value="Medicine">Medicamento</option>
                                         <option value="Vaccine">Vacuna</option>
                                         <option value="Accessory">Accesorio</option>
@@ -134,77 +125,84 @@ function InventoryForm() {
                                         <option value="Other">Otro</option>
                                     </CFormSelect>
                                 </CCol>
+
                                 {/* Estado */}
-                                <CCol md={6} className="mb-3">
-                                    <CFormSelect label="Estado" {...register('status', { required: true })}>
-                                        <option value="Available">Disponible</option>
-                                        <option value="Out of Stock">Agotado</option>
-                                        <option value="Discontinued">caducado</option>
+                                <CCol md={6}>
+                                    <CFormLabel className="fw-semibold text-secondary small text-uppercase">Estado de Stock</CFormLabel>
+                                    <CFormSelect 
+                                        className="shadow-sm border-0 p-2"
+                                        {...register('status', { required: true })}
+                                    >
+                                        <option value="Available">🟢 Disponible</option>
+                                        <option value="Out of Stock">🔴 Agotado</option>
+                                        <option value="Discontinued">🟠 Descontinuado</option>
                                     </CFormSelect>
                                 </CCol>
-                            </CRow>
 
-                            <CRow>
                                 {/* Cantidad */}
-                                <CCol md={6} className="mb-3">
+                                <CCol md={6}>
+                                    <CFormLabel className="fw-semibold text-secondary small text-uppercase">Stock Inicial</CFormLabel>
                                     <CFormInput 
-                                        label="Stock Disponible" 
+                                        className="shadow-sm border-0 p-2"
                                         type="number" 
                                         {...register('quantity', { required: true, min: 0 })} 
                                     />
                                 </CCol>
+
                                 {/* Precio */}
-                                <CCol md={6} className="mb-3">
+                                <CCol md={6}>
+                                    <CFormLabel className="fw-semibold text-secondary small text-uppercase">Precio Unitario ($)</CFormLabel>
                                     <CFormInput 
-                                        label="Precio Unitario ($)" 
+                                        className="shadow-sm border-0 p-2"
                                         type="number" 
                                         step="0.01" 
                                         {...register('unit_price', { required: true, min: 0 })} 
                                     />
                                 </CCol>
+
+                                {/* Instrucciones */}
+                                <CCol md={12}>
+                                    <CFormLabel className="fw-semibold text-secondary small text-uppercase">Notas Adicionales</CFormLabel>
+                                    <CFormTextarea 
+                                        className="shadow-sm border-0 p-2"
+                                        rows={3} 
+                                        {...register('instructions')} 
+                                        placeholder="Indicaciones de uso o notas técnicas..."
+                                    />
+                                </CCol>
+
+                                {/* Imagen */}
+                                <CCol md={12} className="mt-4">
+                                    <div className="bg-white p-3 rounded shadow-sm border border-light">
+                                        <CFormLabel className="fw-bold mb-2 text-dark">📸 Imagen del Producto</CFormLabel>
+                                        <CFormInput 
+                                            type="file" 
+                                            accept="image/*"
+                                            className="form-control-sm"
+                                            {...register('imagen')} 
+                                        />
+                                    </div>
+                                </CCol>
                             </CRow>
 
-                            {/* Instrucciones */}
-                            <div className="mb-3">
-                                <CFormTextarea 
-                                    label="Instrucciones / Descripción" 
-                                    rows={3} 
-                                    {...register('instructions')} 
-                                    placeholder="Indicaciones de uso o notas..."
-                                />
-                            </div>
-
-                            {/* Imagen */}
-                            <div className="mb-4">
-                                <CFormInput 
-                                    label="Imagen del Producto" 
-                                    type="file" 
-                                    {...register('imagen')} 
-                                    accept="image/*"
-                                />
-                                {id && (
-                                    <div className="mt-2">
-                                        <small className="text-info">
-                                            ℹ️ Deja este campo vacío para mantener la imagen actual.
-                                        </small>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Botones */}
-                            <div className="d-flex justify-content-end gap-2 border-top pt-3">
-                                <CButton color="secondary" variant="outline" onClick={() => navigate('/inventory')}>
-                                    Cancelar
+                            {/* Botones de Acción */}
+                            <div className="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
+                                <CButton 
+                                      type="submit" 
+                                    color="primary" 
+                                    disabled={loading}
+                                    className="px-5 py-2 shadow fw-bold rounded-pill"
+                                    onClick={() => navigate('/inventory')}
+                                >
+                                    Descartar
                                 </CButton>
-                                <CButton type="submit" color="primary" disabled={loading}>
-                                    {loading ? (
-                                        <>
-                                            <CSpinner component="span" size="sm" variant="grow" className="me-2" />
-                                            Guardando...
-                                        </>
-                                    ) : (
-                                        id ? 'Actualizar Producto' : 'Registrar Producto'
-                                    )}
+                                <CButton 
+                                    type="submit" 
+                                    color="primary" 
+                                    disabled={loading}
+                                    className="px-5 py-2 shadow fw-bold rounded-pill"
+                                >
+                                    {loading ? 'Guardando...' : id ? 'Finalizar Cambios ✨' : 'Finalizar Registro ✨'}
                                 </CButton>
                             </div>
                         </CForm>
@@ -214,5 +212,7 @@ function InventoryForm() {
         </CRow>
     );
 }
+
+const CFormLabel = ({ children, className }) => <label className={`form-label ${className}`}>{children}</label>;
 
 export default InventoryForm;

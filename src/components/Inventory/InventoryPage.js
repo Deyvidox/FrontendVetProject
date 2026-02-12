@@ -15,7 +15,6 @@ function InventoryPage() {
     
     const navigate = useNavigate();
 
-    // Función de carga envuelta en useCallback para evitar renders infinitos
     const loadInventory = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -40,7 +39,6 @@ function InventoryPage() {
         }
     }, [searchTerm, categoryFilter]);
 
-    // Efecto con Debounce: Espera 400ms tras dejar de escribir para consultar al API
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
             loadInventory();
@@ -50,11 +48,10 @@ function InventoryPage() {
     }, [loadInventory]);
 
     const handleDelete = async (id) => {
-        if (window.confirm("¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.")) {
+        if (window.confirm("¿Estás seguro de que deseas eliminar este producto?")) {
             try {
                 const res = await deleteProductRequest(id);
                 if (res.success) {
-                    // Recargar la lista tras eliminar
                     loadInventory();
                 } else {
                     alert(res.message || "Error al eliminar.");
@@ -66,59 +63,76 @@ function InventoryPage() {
     };
 
     return (
-        <div className="container-fluid p-4">
-            {/* Cabecera y Filtros */}
+        <div className="container-fluid p-4" style={{ minHeight: '100vh' }}>
+            {/* Cabecera Estilizada */}
             <CRow className="mb-4 align-items-center">
-                <CCol md={4}>
-                    <h3 className="text-white mb-0">Gestión de Inventario</h3>
+                <CCol md={5}>
+                    <div className="d-flex align-items-center">
+                        <div className="bg-primary rounded-3 p-2 me-3 shadow">
+                            <span className="fs-4 text-white">📦</span>
+                        </div>
+                        <div>
+                            <h3 className="text-white fw-bold mb-0">Gestión de Inventario</h3>
+                            <p className="text-info small mb-0">Control de stock y suministros médicos</p>
+                        </div>
+                    </div>
                 </CCol>
-                <CCol md={8} className="d-flex gap-2 justify-content-end flex-wrap">
+                
+                <CCol md={7} className="d-flex gap-2 justify-content-end flex-wrap mt-3 mt-md-0">
                     <CFormInput 
                         type="text"
-                        placeholder="Buscar por nombre..." 
-                        style={{ maxWidth: '280px' }}
+                        placeholder="🔍 Buscar producto..." 
+                        className="border-0 shadow-sm bg-dark text-white p-2 px-3 rounded-pill"
+                        style={{ maxWidth: '280px', border: '1px solid #3b3b5e' }}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <CFormSelect 
-                        style={{ maxWidth: '200px' }}
+                        className="border-0 shadow-sm bg-dark text-white p-2 rounded-pill cursor-pointer"
+                        style={{ maxWidth: '200px', border: '1px solid #3b3b5e' }}
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
                     >
-                        <option value="">Todas las Categorías</option>
+                        <option value="">📁 Todas las Categorías</option>
                         <option value="Medicine">Medicamentos</option>
                         <option value="Vaccine">Vacunas</option>
                         <option value="Accessory">Accesorios</option>
                         <option value="Food">Alimentos</option>
                         <option value="Other">Otros</option>
                     </CFormSelect>
-                    <CButton color="primary" onClick={() => navigate('/inventory/add')}>
+                    <CButton 
+                        color="primary" 
+                        className="px-4 fw-bold rounded-pill shadow-sm"
+                        onClick={() => navigate('/inventory/add')}
+                    >
                         + Nuevo Producto
                     </CButton>
                 </CCol>
             </CRow>
 
-            {/* Alertas de Error */}
+            {/* Alertas con estilo */}
             {error && (
-                <CAlert color="danger" className="mb-4">
-                    {error}
+                <CAlert color="danger" className="border-0 shadow mb-4">
+                    <strong>¡Atención!</strong> {error}
                 </CAlert>
             )}
 
-            {/* Contenido Principal */}
+            {/* Contenedor Principal de la Tabla */}
             <CRow>
                 <CCol xs={12}>
                     {loading ? (
-                        <div className="text-center py-5">
-                            <CSpinner color="light" size="xl" />
-                            <p className="text-light mt-3">Sincronizando inventario...</p>
+                        <div className="text-center py-5 rounded shadow" style={{ backgroundColor: '#0d0e0b' }}>
+                            <CSpinner color="info" variant="grow" size="xl" />
+                            <p className="text-info mt-3 fw-semibold">Sincronizando inventario en tiempo real...</p>
                         </div>
                     ) : (
-                        <InventoryTable 
-                            inventory={inventory} 
-                            onDelete={handleDelete}
-                            onEdit={(item) => navigate(`/inventory/edit/${item.id}`)}
-                        />
+                        <div className="shadow-lg">
+                            <InventoryTable 
+                                inventory={inventory} 
+                                onDelete={handleDelete}
+                                onEdit={(item) => navigate(`/inventory/edit/${item.id}`)}
+                            />
+                        </div>
                     )}
                 </CCol>
             </CRow>
