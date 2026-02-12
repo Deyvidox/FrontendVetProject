@@ -13,13 +13,13 @@ const RecoverPassword = React.lazy(() => import('./components/recover_password/R
 const Register = React.lazy(() => import('./components/register/Register'))
 
 // APPOINTMENTS
-
-const AppointmentPage  = React.lazy(() => import('./components/Appointments/AppointmentsPage'))
-const AppointmentList  = React.lazy(() => import('./components/Appointments/AppointmentList'))
+const AppointmentPage = React.lazy(() => import('./components/Appointments/AppointmentsPage'))
+const AppointmentList = React.lazy(() => import('./components/Appointments/AppointmentList'))
 
 // INVENTORY
 const InventoryPage = React.lazy(() => import('./components/Inventory/InventoryPage'))
-
+// 1. IMPORTANTE: Agregamos el componente del Formulario
+const InventoryForm = React.lazy(() => import('./components/Inventory/InventoryForm'))
 
 const routes = [
   // LOGIN
@@ -38,13 +38,14 @@ const routes = [
   { path: '/register', name: 'Register', element: Register },
 
   // APPOINTMENTS
-  
   { path: '/appointments', name: 'Appointments', element: AppointmentPage },
   { path: '/appointments/list', name: 'Appointment List', element: AppointmentList},
 
-  //inventory 
-  {path: '/Inventory', name: 'Inventory', element: InventoryPage},
- 
+  // INVENTORY 
+  { path: '/inventory', name: 'Inventory', element: InventoryPage },
+  // 2. AGREGAMOS LAS RUTAS FALTANTES:
+  { path: '/inventory/add', name: 'Add Product', element: InventoryForm },
+  { path: '/inventory/edit/:id', name: 'Edit Product', element: InventoryForm },
 ]
 
 export default routes

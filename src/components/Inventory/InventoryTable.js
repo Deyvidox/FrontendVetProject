@@ -1,167 +1,102 @@
-// InventoryTable.jsx
-import React, { useMemo, useState } from 'react';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-  CButton,
-  CFormSelect,
-  CFormInput,
-} from '@coreui/react';
-import { jsPDF } from 'jspdf';
-import * as XLSX from 'xlsx';
+import React from 'react';
 
 const InventoryTable = ({ inventory, onEdit, onDelete }) => {
-  const [search, setSearch] = useState('');
-  const [busquedaActiva, setBusquedaActiva] = useState(false);
-  const [filtroEstado, setFiltroEstado] = useState('Todos');
-  const [filtroTipo, setFiltroTipo] = useState('Todos');
+    // Función auxiliar para definir el color según el estado
+    const getStatusStyle = (status) => {
+        switch (status) {
+            case 'Disponible':
+            case 'Available':
+                return { backgroundColor: '#2eb85c', color: 'white' }; // Verde
+            case 'Agotado':
+            case 'Out of Stock':
+                return { backgroundColor: '#e55353', color: 'white' }; // Rojo
+            case 'Interrumpido':
+            case 'Discontinued':
+                return { backgroundColor: '#f9b115', color: 'white' }; // Naranja
+            default:
+                return { backgroundColor: '#636f83', color: 'white' }; // Gris
+        }
+    };
 
-  // Filtrado optimizado con useMemo
-  const filteredInventory = useMemo(
-    () =>
-      inventory.filter(
-        (item) =>
-          (filtroEstado === 'Todos' || item.estado === filtroEstado) &&
-          (filtroTipo === 'Todos' || item.tipo === filtroTipo) &&
-          (!busquedaActiva ||
-            !search.trim() ||
-            item.nombre.toLowerCase().includes(search.toLowerCase()))
-      ),
-    [inventory, filtroEstado, filtroTipo, search, busquedaActiva]
-  );
-
-  // Colores de estado
-  const getStateColor = (estado) => {
-    if (estado === 'Disponible') return 'text-success';
-    if (estado === 'Agotado') return 'text-danger';
-    return 'text-secondary';
-  };
-
-  // Exportar PDF
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(14);
-    doc.text('Reporte de Inventario', 14, 18);
-    let y = 28;
-
-    filteredInventory.forEach((item, idx) => {
-      doc.setFontSize(11);
-      doc.text(
-        `${idx + 1}. Nombre: ${item.nombre} | Tipo: ${item.tipo} | Estado: ${item.estado}`,
-        14,
-        y
-      );
-      y += 6;
-      doc.text(`Cantidad: ${item.cantidad} | Precio: ${item.precio_unitario.toFixed(2)}`, 14, y);
-      y += 8;
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
-    });
-
-    doc.save('inventario.pdf');
-  };
-
-  // Exportar Excel
-  const exportXLS = () => {
-    const data = filteredInventory.map((item) => ({
-      Nombre: item.nombre,
-      Tipo: item.tipo,
-      Cantidad: item.cantidad,
-      Precio: item.precio_unitario.toFixed(2),
-      Estado: item.estado,
-      Instrucciones: item.instrucciones || '',
-      Tags: item.tags?.join(', ') || '',
-    }));
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Inventario');
-    XLSX.writeFile(wb, 'inventario.xlsx');
-  };
-
-  return (
-    <div className="inventory-list-section">
-      <h3 className="list-title">Lista de Productos</h3>
-      <p className="list-summary">Se muestran {filteredInventory.length} productos.</p>
-
-      <div className="d-flex gap-2 mb-3">
-        <CFormInput
-          placeholder="Buscar por nombre"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button type="button" onClick={() => setBusquedaActiva(!busquedaActiva)}>
-          {busquedaActiva ? 'Desactivar búsqueda' : 'Buscar'}
-        </button>
-
-        <CFormSelect value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)}>
-          <option value="Todos">Todos</option>
-          <option value="Medicina">Medicina</option>
-          <option value="Vacuna">Vacuna</option>
-          <option value="Accesorio">Accesorio</option>
-          <option value="Alimento">Alimento</option>
-          <option value="Otro">Otro</option>
-        </CFormSelect>
-
-        <CFormSelect value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
-          <option value="Todos">Todos</option>
-          <option value="Disponible">Disponible</option>
-          <option value="Agotado">Agotado</option>
-          <option value="Descontinuado">Descontinuado</option>
-        </CFormSelect>
-
-        <button type="button" onClick={exportPDF}>
-          PDF
-        </button>
-        <button type="button" onClick={exportXLS}>
-          Excel
-        </button>
-      </div>
-
-      <CTable bordered hover>
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Nombre</CTableHeaderCell>
-            <CTableHeaderCell>Tipo</CTableHeaderCell>
-            <CTableHeaderCell>Cantidad</CTableHeaderCell>
-            <CTableHeaderCell>Precio</CTableHeaderCell>
-            <CTableHeaderCell>Estado</CTableHeaderCell>
-            <CTableHeaderCell>Tags</CTableHeaderCell>
-            <CTableHeaderCell>Imagen</CTableHeaderCell>
-            <CTableHeaderCell>Acciones</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {filteredInventory.map((item) => (
-            <CTableRow key={item.id}>
-              <CTableDataCell>{item.nombre}</CTableDataCell>
-              <CTableDataCell>{item.tipo}</CTableDataCell>
-              <CTableDataCell>{item.cantidad}</CTableDataCell>
-              <CTableDataCell>{item.precio_unitario.toFixed(2)}</CTableDataCell>
-              <CTableDataCell className={getStateColor(item.estado)}>{item.estado}</CTableDataCell>
-              <CTableDataCell>{item.tags?.join(', ')}</CTableDataCell>
-              <CTableDataCell>
-                {item.imagen_url && <img src={item.imagen_url} alt="Producto" width="50" />}
-              </CTableDataCell>
-              <CTableDataCell>
-                <CButton color="warning" size="sm" onClick={() => onEdit(item)}>
-                  Editar
-                </CButton>
-                <CButton color="danger" size="sm" className="ms-1" onClick={() => onDelete(item.id)}>
-                  Eliminar
-                </CButton>
-              </CTableDataCell>
-            </CTableRow>
-          ))}
-        </CTableBody>
-      </CTable>
-    </div>
-  );
+    return (
+        <div className="table-responsive rounded shadow" style={{ backgroundColor: '#252545' }}>
+            <table className="table table-hover table-dark mb-0">
+                <thead>
+                    <tr>
+                        <th className="border-secondary">Imagen</th>
+                        <th className="border-secondary">Producto</th>
+                        <th className="border-secondary">Categoría</th>
+                        <th className="border-secondary">Existencias</th>
+                        <th className="border-secondary">Precio</th>
+                        <th className="border-secondary text-center">Estado</th>
+                        <th className="border-secondary">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {inventory.length > 0 ? (
+                        inventory.map((item) => (
+                            <tr key={item.id}>
+                                <td className="align-middle">
+                                    <img 
+                                        src={item.image_url || 'https://via.placeholder.com/50'} 
+                                        alt={item.name} 
+                                        className="rounded"
+                                        style={{ width: '45px', height: '45px', objectFit: 'cover' }}
+                                    />
+                                </td>
+                                <td className="align-middle">
+                                    <div className="d-flex flex-column">
+                                        <span style={{ 
+                                            color: '#ffffff', 
+                                            fontWeight: 'bold', 
+                                            fontSize: '1rem',
+                                            letterSpacing: '0.5px'
+                                        }}>
+                                            {item.name}
+                                        </span>
+                                        <small className="text-info" style={{ fontSize: '0.75rem' }}>
+                                            #INV-{item.id}
+                                        </small>
+                                    </div>
+                                </td>
+                                <td className="align-middle">{item.type}</td>
+                                <td className="align-middle text-center">{item.quantity}</td>
+                                <td className="align-middle text-success font-weight-bold">
+                                    ${parseFloat(item.unit_price || 0).toFixed(2)}
+                                </td>
+                                <td className="align-middle text-center">
+                                    <span 
+                                        className="badge" 
+                                        style={{
+                                            ...getStatusStyle(item.status),
+                                            padding: '0.5em 0.8em',
+                                            fontSize: '0.85rem',
+                                            minWidth: '95px',
+                                            display: 'inline-block'
+                                        }}
+                                    >
+                                        {item.status}
+                                    </span>
+                                </td>
+                                <td className="align-middle">
+                                    <div className="btn-group btn-group-sm">
+                                        <button className="btn btn-outline-primary" onClick={() => onEdit(item)}>Editar</button>
+                                        <button className="btn btn-outline-danger" onClick={() => onDelete(item.id)}>Borrar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="7" className="text-center py-4 text-muted">
+                                No se encontraron productos con esos filtros.
+                            </td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
+    );
 };
 
 export default InventoryTable;
