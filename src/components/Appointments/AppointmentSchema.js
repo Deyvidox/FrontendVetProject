@@ -1,48 +1,27 @@
-// AppointmentSchema.js
 import { z } from 'zod';
 
-// Esquema de validación para los datos de una cita (igual al que enviaste)
 export const appointmentSchema = z.object({
-  mascota_id: z
+  pet_id: z
     .union([z.string(), z.number()])
     .transform((v) => Number(v))
-    .refine((v) => Number.isInteger(v) && v > 0, { message: 'Mascota requerida' }),
-
-  veterinario_id: z
-    .union([z.string(), z.number()])
-    .transform((v) => Number(v))
-    .refine((v) => Number.isInteger(v) && v > 0, { message: 'Veterinario requerido' }),
-
-  fecha_cita: z
-    .string()
-    .refine((val) => !isNaN(Date.parse(val)), { message: 'Fecha inválida' })
-    .refine((val) => new Date(val) > new Date(), { message: 'No puedes agendar en el pasado' }),
-
-  estado: z.enum(['Pendiente', 'Confirmada', 'Cancelada', 'Completada']),
-
-  notas: z.string().optional(),
-
-  evidencia_url: z.string().url().optional().or(z.literal('')),
-})
-.superRefine((data, ctx) => {
-  if (data.estado === 'Cancelada') {
-    const notas = (data.notas || '').trim();
-    if (notas.length < 5) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['notas'],
-        message: 'Notas requeridas si cancelas (mínimo 5 caracteres).',
-      });
-    }
-  }
+    .refine((v) => v > 0, { message: 'Mascota es requerida' }),
+  
+  status: z.enum(['Pending', 'Scheduled', 'Completed', 'Cancelled']),
+  
+  appointment_date: z.string().min(1, "La fecha es requerida"),
+  
+  appointment_time: z.string().min(1, "La hora es requerida"),
+  
+  service_type: z.string().min(1, "El tipo de servicio es requerido"),
+  
+  notes: z.string().max(1000, "Máximo 1000 caracteres").optional().or(z.literal('')),
 });
 
-// Exportar un objeto con valores por defecto que usaremos en el formulario
 export const defaultAppointmentValues = {
-  mascota_id: '',
-  veterinario_id: '',
-  fecha_cita: '',
-  estado: 'Pendiente',
-  notas: '',
-  evidencia_url: '',
+  pet_id: '',
+  status: 'Pending',
+  appointment_date: new Date().toISOString().split('T')[0],
+  appointment_time: '08:00',
+  service_type: 'Consulta General',
+  notes: '',
 };

@@ -1,52 +1,38 @@
 import axios from 'axios';
 
-// URL de tu servidor Express real
-const API_URL = 'http://localhost:4000/appointments'; 
+const API_URL = 'http://localhost:4000/api/appointments';
 
 export const appointmentService = {
+  // Obtiene la lista de Mascotas y Dueños para el formulario
+  getFormData: async () => {
+    const res = await axios.get(`${API_URL}/form-data`);
+    return res.data.data;
+  },
+
   getAll: async () => {
-    try {
-      const response = await axios.get(API_URL);
-      // Estructura según tu controlador: response.data.message.appointments
-      return response.data.message.appointments || [];
-    } catch (error) {
-      throw error.response?.data?.message || "Error al cargar citas";
-    }
+    const res = await axios.get(API_URL);
+    return res.data.data;
   },
 
   create: async (data) => {
-    try {
-      const payload = {
-        pet_id: Number(data.mascota_id),
-        status: data.estado,
-        notes: data.notas || ""
-      };
-      const response = await axios.post(API_URL, payload);
-      return response.data;
-    } catch (error) {
-      throw error.response?.data?.message || "Error al crear cita";
-    }
+    // Aquí 'data' ya lleva: pet_id, appointment_date, appointment_time, service_type, status, notes
+    const res = await axios.post(API_URL, data);
+    return res.data;
   },
 
   update: async (id, data) => {
-    try {
-      const payload = {
-        status: data.estado,
-        notes: data.notas
-      };
-      const response = await axios.put(`${API_URL}/${id}`, payload);
-      return response.data;
-    } catch (error) {
-      throw error.response?.data?.message || "Error al actualizar";
-    }
+    const res = await axios.put(`${API_URL}/${id}`, data);
+    return res.data;
+  },
+
+  // NUEVA FUNCIÓN: Para actualizar solo el estado desde la tabla
+  updateStatus: async (id, status) => {
+    const res = await axios.patch(`${API_URL}/${id}/status`, { status });
+    return res.data;
   },
 
   delete: async (id) => {
-    try {
-      await axios.delete(`${API_URL}/${id}`);
-      return true;
-    } catch (error) {
-      throw error.response?.data?.message || "Error al eliminar";
-    }
+    await axios.delete(`${API_URL}/${id}`);
+    return true;
   }
 };

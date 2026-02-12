@@ -1,225 +1,117 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import AlertModal from "./AlertModal";
-import {
-  appointmentSchema,
-  defaultAppointmentValues,
-} from "./AppointmentSchema";
-import "../../css/Inventory/inventory.css";
+import { appointmentSchema, defaultAppointmentValues } from "./AppointmentSchema";
+import { 
+  CButton, CFormSelect, CFormTextarea, CFormLabel, 
+  CRow, CCol, CForm, CFormInput 
+} from "@coreui/react";
 
-const AppointmentForm = ({
-  onSubmit,
-  mascotas = [],
-  veterinarios = [],
-  appointments = [],
-  initialValues = defaultAppointmentValues,
-  onClose,
-}) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    setValue,
-    reset,
-  } = useForm({
+const AppointmentForm = ({ onSubmit, clientsData = [], initialValues, onClose }) => {
+  const [selectedOwnerId, setSelectedOwnerId] = useState("");
+  const [filteredPets, setFilteredPets] = useState([]);
+
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm({
     resolver: zodResolver(appointmentSchema),
-    defaultValues: initialValues,
+    defaultValues: initialValues || defaultAppointmentValues,
   });
 
+  const owners = Array.from(new Set(clientsData.map(i => i.owner_id)))
+    .map(id => clientsData.find(i => i.owner_id === id))
+    .filter(Boolean);
+
   useEffect(() => {
-    reset(initialValues);
-  }, [initialValues, reset]);
+    if (selectedOwnerId) {
+      const pets = clientsData.filter(i => Number(i.owner_id) === Number(selectedOwnerId));
+      setFilteredPets(pets);
+    } else {
+      setFilteredPets([]);
+    }
+  }, [selectedOwnerId, clientsData]);
 
-  const estadoValue = watch("estado");
-  const fechaValue = watch("fecha_cita");
-  const vetValue = watch("veterinario_id");
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState("success");
-  const [modalMsg, setModalMsg] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const isDoubleBooked = () => {
-    if (!vetValue || !fechaValue) return false;
-
-    const targetTime = new Date(fechaValue).getTime();
-
-    return appointments.some(
-      (a) =>
-        a.veterinario_id === Number(vetValue) &&
-        new Date(a.fecha_cita).getTime() === targetTime
-    );
-  };
-
-  const submitHandler = async (data) => {
-    if (isDoubleBooked()) {
-      setModalType("error");
-      setModalMsg("El veterinario ya tiene una cita en ese horario.");
-      setModalOpen(true);
-      return;
-    }    
-    setLoading(true);
-
-    try {
-      const payload = {
-        ...data,
-        mascota_id: Number(data.mascota_id),
-        veterinario_id: Number(data.veterinario_id),
-        fecha_cita: new Date(data.fecha_cita).toISOString(),
-      };
-
-      await onSubmit(payload);
-
-      setModalType("success");
-      setModalMsg("Cita registrada correctamente.");
-      setModalOpen(true);
-
+  useEffect(() => {
+    if (initialValues) {
+      reset(initialValues);
+      const relation = clientsData.find(i => Number(i.pet_id) === Number(initialValues.pet_id));
+      if (relation) setSelectedOwnerId(relation.owner_id);
+    } else {
       reset(defaultAppointmentValues);
-
-      if (onClose) {
-        setTimeout(() => {
-          onClose();
-        }, 1500);
-      }
-    } catch (error) {
-      setModalType("error");
-      setModalMsg(error.message || "Error al guardar la cita.");
-      setModalOpen(true);
-    } finally {
-      setLoading(false);
+      setSelectedOwnerId("");
     }
-  };
-
-  const handleCloudinaryUpload = async (file) => {
-    if (!file) return;
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "tu_upload_preset");
-
-      const res = await fetch("https://api.cloudinary.com/v1_1/tu_cloud_name/image/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const json = await res.json();
-
-      if (json.secure_url) {
-        setValue("evidencia_url", json.secure_url);
-        setModalType("success");
-        setModalMsg("Imagen subida correctamente.");
-        setModalOpen(true);
-      } else {
-        throw new Error("Respuesta inválida de Cloudinary.");
-      }
-    } catch (error) {
-      setModalType("error");
-      setModalMsg("Error al subir la imagen.");
-      setModalOpen(true);
-    }
-  };
+  }, [initialValues, reset, clientsData]);
 
   return (
-    <form onSubmit={handleSubmit()} className="appointment-form">
-      <div className="auth-header">
-        <h1>{initialValues.id ? "Editar Cita" : "Crear Cita"}</h1>
-        <p>Completa los datos para agendar tu cita.</p>
+    <CForm onSubmit={handleSubmit(onSubmit)} className="p-4" style={{ backgroundColor: '#f9f9fb' }}>
+      <CRow className="g-3">
+        <CCol md={6}>
+          <CFormLabel className="fw-bold text-dark small text-uppercase">Dueño / Propietario</CFormLabel>
+          <CFormSelect 
+            className="shadow-sm border-0 p-2 text-dark bg-white"
+            value={selectedOwnerId} 
+            onChange={(e) => { setSelectedOwnerId(e.target.value); setValue("pet_id", ""); }}
+          >
+            <option value="">-- Seleccionar Dueño --</option>
+            {owners.map(o => (
+              <option key={o.owner_id} value={o.owner_id}>{o.owner_name}</option>
+            ))}
+          </CFormSelect>
+        </CCol>
+
+        <CCol md={6}>
+          <CFormLabel className="fw-bold text-dark small text-uppercase">Mascota (Paciente)</CFormLabel>
+          <CFormSelect 
+            className={`shadow-sm border-0 p-2 text-dark bg-white ${errors.pet_id ? 'is-invalid' : ''}`}
+            {...register("pet_id")}
+            disabled={!selectedOwnerId}
+          >
+            <option value="">-- {selectedOwnerId ? "Seleccione Mascota" : "Primero elija un dueño"} --</option>
+            {filteredPets.map(p => (
+              <option key={p.pet_id} value={p.pet_id}>{p.pet_name} — {p.breed}</option>
+            ))}
+          </CFormSelect>
+        </CCol>
+
+        <CCol md={6}>
+          <CFormLabel className="fw-bold text-dark small text-uppercase">Fecha de la Cita</CFormLabel>
+          <CFormInput type="date" className="shadow-sm border-0 p-2" {...register("appointment_date")} />
+        </CCol>
+
+        <CCol md={6}>
+          <CFormLabel className="fw-bold text-dark small text-uppercase">Hora de la Cita</CFormLabel>
+          <CFormInput type="time" className="shadow-sm border-0 p-2" {...register("appointment_time")} />
+        </CCol>
+
+        <CCol md={6}>
+          <CFormLabel className="fw-bold text-dark small text-uppercase">Tipo de Servicio</CFormLabel>
+          <CFormSelect className="shadow-sm border-0 p-2" {...register("service_type")}>
+            <option value="Consulta General">🩺 Consulta General</option>
+            <option value="Vacunación">💉 Vacunación</option>
+            <option value="Cirugía">✂️ Cirugía</option>
+            <option value="Peluquería">🚿 Peluquería</option>
+          </CFormSelect>
+        </CCol>
+
+        <CCol md={6}>
+          <CFormLabel className="fw-bold text-dark small text-uppercase">Estado Inicial</CFormLabel>
+          <CFormSelect className="shadow-sm border-0 p-2" {...register("status")}>
+            <option value="Pending">🟡 Pendiente</option>
+            <option value="Scheduled">🔵 Programada</option>
+          </CFormSelect>
+        </CCol>
+
+        <CCol md={12}>
+          <CFormLabel className="fw-bold text-dark small text-uppercase">Observaciones</CFormLabel>
+          <CFormTextarea className="shadow-sm border-0 p-2" rows={3} {...register("notes")} />
+        </CCol>
+      </CRow>
+
+      <div className="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
+        <CButton color="link" className="text-decoration-none text-muted fw-bold" onClick={onClose}>Cancelar</CButton>
+        <CButton color="primary" type="submit" className="px-5 py-2 shadow fw-bold rounded-pill">
+          {initialValues ? "Guardar Cambios" : "Confirmar Cita"}
+        </CButton>
       </div>
-
-      <label>Mascota</label>
-      <select {...register("mascota_id")} disabled={loading}>
-        <option value="">Selecciona una mascota</option>
-        {mascotas.map((m) => (
-          <option key={m.id} value={m.id}>
-            {m.nombre}
-          </option>
-        ))}
-      </select>
-      {errors.mascota_id && (
-        <span className="text-danger">{errors.mascota_id.message}</span>
-      )}
-
-      <label>Veterinario</label>
-      <select {...register("veterinario_id")} disabled={loading}>
-        <option value="">Selecciona un veterinario</option>
-        {veterinarios.map((v) => (
-          <option key={v.id} value={v.id}>
-            {v.nombre}
-          </option>
-        ))}
-      </select>
-      {errors.veterinario_id && (
-        <span className="text-danger">{errors.veterinario_id.message}</span>
-      )}
-
-      <label>Fecha y hora de la cita</label>
-      <input 
-        type="datetime-local" 
-        {...register("fecha_cita")} 
-        disabled={loading}
-      />
-      {errors.fecha_cita && (
-        <span className="text-danger">{errors.fecha_cita.message}</span>
-      )}
-
-      <label>Estado</label>
-      <select {...register("estado")} disabled={loading}>
-        <option value="Pendiente">Pendiente</option>
-        <option value="Confirmada">Confirmada</option>
-        <option value="Cancelada">Cancelada</option>
-        <option value="Completada">Completada</option>
-      </select>
-
-      <label>Notas</label>
-      <textarea
-        {...register("notas")}
-        placeholder={
-          estadoValue === "Cancelada"
-            ? "Explica el motivo de la cancelación"
-            : "Notas de la cita"
-        }
-        disabled={loading}
-      />
-      {errors.notas && (
-        <span className="text-danger">{errors.notas.message}</span>
-      )}
-
-      <label>Evidencia (imagen)</label>
-      <div className="upload-row">
-        <input
-          type="url"
-          placeholder="URL de la imagen (opcional)"
-          {...register("evidencia_url")}
-          disabled={loading}
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleCloudinaryUpload(e.target.files?.[0])}
-          disabled={loading}
-        />
-      </div>
-
-      {isDoubleBooked() && (
-        <span className="text-danger">
-          Conflicto: el veterinario ya tiene una cita en ese horario.
-        </span>
-      )}
-
-      <button type="submit" className="btn" disabled={loading}>
-        {loading ? "Guardando..." : "Guardar cita"}
-      </button>
-
-      <AlertModal
-        isOpen={modalOpen}
-        message={modalMsg}
-        onClose={() => setModalOpen(false)}
-        type={modalType}
-      />
-    </form>
+    </CForm>
   );
 };
 
